@@ -330,8 +330,8 @@ const buyBtn = document.getElementById("buyBtn");
 
 function renderQty(){
   qtyValEl.innerText = qty;
-  qtyMinusBtn.disabled = qty <= 1 || outOfStock;
-  qtyPlusBtn.disabled = qty >= maxQty || outOfStock;
+  qtyMinusBtn.disabled = qty <= 1;
+  qtyPlusBtn.disabled = qty >= maxQty;
   const total = productPrice * qty;
   document.getElementById("priceVal").innerText = total.toLocaleString("de-DE") + " ກີບ";
 }
@@ -344,11 +344,6 @@ qtyPlusBtn.addEventListener("click", function(){
 });
 
 renderQty();
-
-if(outOfStock){
-  buyBtn.disabled = true;
-  buyBtn.innerText = "ສິນຄ້າໝົດ";
-}
 
 (async function(){
   const {data:{session}} = await supabaseClient.auth.getSession();
@@ -371,8 +366,6 @@ let selectedSlipFile = null;
 
 // กดปุ่มสั่งซื้อ -> โชว์ QR แทนการบันทึกทันที
 buyBtn.addEventListener("click", function(){
-  if(outOfStock) return;
-
   document.getElementById("payTotal").innerText =
     (productPrice * qty).toLocaleString("de-DE") + " ກີບ";
 
