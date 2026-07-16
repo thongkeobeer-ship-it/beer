@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ຢືນຢັນສັ່ງຊື້</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; font-family:'Kanit',Arial,sans-serif; -webkit-tap-highlight-color:transparent; }
+
+:root{
+  --bg:#0a0a0c;
+  --card:#141417;
+  --card2:#1a1a1e;
+  --line:#28282e;
+  --red:#ff2b45;
+  --red2:#ff5a70;
+  --green:#3ddc73;
+  --muted:#8b8b95;
+  --gold:#ffcf4d;
+}
+
+body{ background:var(--bg); color:#fff; padding-bottom:40px; }
+
+.num{ font-family:'Orbitron',sans-serif; }
+
+/* ===== Top bar ===== */
+.topbar{
+  display:flex; align-items:center; gap:12px;
+  padding:16px; position:sticky; top:0;
+  background:linear-gradient(180deg, rgba(10,10,12,.97), rgba(10,10,12,.85));
+  backdrop-filter:blur(6px);
+  z-index:50;
+  border-bottom:1px solid var(--line);
+}
+.back-btn{
+  width:38px; height:38px; border-radius:50%;
+  background:var(--card2); border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; text-decoration:none; font-size:18px; flex-shrink:0;
+}
+.topbar-title{ font-weight:600; font-size:15px; color:#eee; }
+
+/* ===== Step indicator ===== */
+.steps{
+  display:flex; align-items:center; justify-content:center;
+  gap:6px; padding:22px 16px 6px;
+}
+.step{ display:flex; flex-direction:column; align-items:center; gap:6px; width:78px; }
+.step-dot{
+  width:26px; height:26px; border-radius:50%;
+  background:var(--card2); border:2px solid var(--line);
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:700; color:var(--muted);
+  font-family:'Orbitron',sans-serif;
+  transition:.25s;
+}
+.step-label{ font-size:11px; color:var(--muted); transition:.25s; }
+.step-line{ flex:1; height:2px; background:var(--line); margin:0 -6px; position:relative; top:-16px; }
+
+.step.done .step-dot{ background:var(--green); border-color:var(--green); color:#04140a; }
+.step.done .step-label{ color:var(--green); }
+.step.active .step-dot{
+  background:var(--red); border-color:var(--red); color:#fff;
+  box-shadow:0 0 0 4px rgba(255,43,69,.22), 0 0 14px rgba(255,43,69,.55);
+}
+.step.active .step-label{ color:#fff; font-weight:600; }
+.step.done ~ .step-line, .step-line.done{ background:var(--green); }
+
+/* ===== Ticket card ===== */
+.wrap{ max-width:480px; margin:0 auto; padding:10px 16px; }
+
+.ticket{
+  background:var(--card);
+  border:1px solid rgba(255,43,69,.35);
+  border-radius:20px;
+  box-shadow:0 0 0 1px rgba(255,43,69,.06), 0 0 30px rgba(255,43,69,.12);
+  margin-top:14px;
+  overflow:hidden;
+}
+
+.ticket-top{ display:flex; align-items:center; gap:14px; padding:18px; }
+.game-icon{
+  width:56px; height:56px; border-radius:14px; flex-shrink:0;
+  background:radial-gradient(circle at 30% 25%, #2a2a30, #0f0f12 70%);
+  border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center;
+  font-size:28px;
+}
+.game-name{ font-size:17px; font-weight:700; margin-bottom:3px; }
+.game-pack{ font-size:12px; color:var(--muted); }
+.game-amount{
+  margin-left:auto; text-align:right; flex-shrink:0;
+}
+.game-amount .n{ font-size:20px; font-weight:800; color:var(--gold); }
+.game-amount .u{ font-size:10px; color:var(--muted); display:block; margin-top:2px; }
+
+.perforation{
+  position:relative; height:0; border-top:2px dashed var(--line); margin:0 18px;
+}
+.perforation::before, .perforation::after{
+  content:""; position:absolute; top:-9px; width:18px; height:18px;
+  border-radius:50%; background:var(--bg);
+}
+.perforation::before{ left:-27px; }
+.perforation::after{ right:-27px; }
+
+.ticket-bottom{ padding:18px; display:flex; flex-direction:column; gap:12px; }
+
+.field label{ display:block; font-size:12px; color:var(--muted); margin-bottom:6px; }
+.field input, .field select{
+  width:100%; padding:13px 14px; border-radius:12px;
+  background:#0f0f12; border:1px solid var(--line); color:#fff;
+  font-size:14px; font-family:inherit; outline:none;
+}
+.field input:focus, .field select:focus{ border-color:var(--red); box-shadow:0 0 0 3px rgba(255,43,69,.15); }
+.field-row{ display:flex; gap:10px; }
+.field-row .field{ flex:1; }
+
+/* ===== Section title ===== */
+.section-title{ font-size:13px; color:var(--muted); margin:20px 2px 10px; font-weight:600; letter-spacing:.3px; }
+
+/* ===== Payment methods ===== */
+.pay-methods{ display:flex; gap:10px; }
+.pay-opt{
+  flex:1; background:var(--card); border:1px solid var(--line);
+  border-radius:14px; padding:14px 8px; text-align:center;
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  cursor:pointer; transition:.15s;
+}
+.pay-opt .ic{ font-size:22px; }
+.pay-opt .lb{ font-size:11px; color:var(--muted); }
+.pay-opt.selected{
+  border-color:var(--red);
+  background:linear-gradient(180deg, rgba(255,43,69,.12), rgba(255,43,69,.03));
+  box-shadow:0 0 16px rgba(255,43,69,.25);
+}
+.pay-opt.selected .lb{ color:#fff; }
+
+/* ===== Receipt ===== */
+.receipt{
+  background:var(--card); border:1px solid var(--line);
+  border-radius:16px; padding:16px 18px;
+}
+.receipt-row{ display:flex; justify-content:space-between; font-size:13px; color:var(--muted); padding:5px 0; }
+.receipt-row.total{
+  border-top:1px solid var(--line); margin-top:8px; padding-top:12px;
+  color:#fff; font-size:15px; font-weight:600;
+}
+.receipt-row.total .val{ font-size:22px; color:var(--gold); }
+
+/* ===== Confirm checkbox ===== */
+.confirm-check{
+  display:flex; align-items:flex-start; gap:10px;
+  background:var(--card2); border:1px solid var(--line);
+  border-radius:14px; padding:14px; margin-top:16px; cursor:pointer;
+}
+.confirm-check input{ width:19px; height:19px; margin-top:1px; accent-color:var(--red); flex-shrink:0; }
+.confirm-check span{ font-size:12.5px; color:#ddd; line-height:1.5; }
+
+/* ===== Buy button ===== */
+.buy-btn{
+  width:100%; margin-top:18px; padding:17px; border:none; border-radius:16px;
+  background:linear-gradient(180deg, var(--red2), var(--red));
+  color:#fff; font-size:16px; font-weight:700; font-family:'Kanit',sans-serif;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.05), 0 8px 24px rgba(255,43,69,.35);
+  transition:.15s;
+}
+.buy-btn:disabled{ opacity:.4; filter:grayscale(.3); }
+.buy-btn:not(:disabled):active{
+  transform:scale(.97);
+  box-shadow:0 0 0 1px rgba(255,255,255,.05), 0 0 30px rgba(255,43,69,.7);
+}
+@keyframes pulseGlow{
+  0%{ box-shadow:0 0 0 0 rgba(255,43,69,.55); }
+  100%{ box-shadow:0 0 0 14px rgba(255,43,69,0); }
+}
+.buy-btn.pulsing{ animation:pulseGlow 1s ease-out; }
+
+/* ===== Trust bar ===== */
+.trust{
+  display:flex; justify-content:space-between; gap:8px; margin-top:22px;
+}
+.trust-item{
+  flex:1; text-align:center; background:var(--card); border:1px solid var(--line);
+  border-radius:12px; padding:12px 6px;
+}
+.trust-item .ic{ font-size:18px; margin-bottom:5px; }
+.trust-item .tx{ font-size:10.5px; color:var(--muted); line-height:1.3; }
+
+/* ===== Status message ===== */
+.status-msg{ text-align:center; font-size:12.5px; margin-top:12px; min-height:16px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+<a href="index.html" class="back-btn">‹</a>
+<div class="topbar-title">ຢືນຢັນການສັ່ງຊື້</div>
+</div>
+
+<div class="steps">
+  <div class="step done" id="step1">
+    <div class="step-dot">✓</div>
+    <div class="step-label">ຂໍ້ມູນ</div>
+  </div>
+  <div class="step-line done" id="line1"></div>
+  <div class="step active" id="step2">
+    <div class="step-dot num">2</div>
+    <div class="step-label">ຊຳລະເງິນ</div>
+  </div>
+  <div class="step-line" id="line2"></div>
+  <div class="step" id="step3">
+    <div class="step-dot num">3</div>
+    <div class="step-label">ຢືນຢັນ</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="ticket">
+    <div class="ticket-top">
+      <div class="game-icon" id="gameIcon">🎮</div>
+      <div>
+        <div class="game-name" id="productName">ສິນຄ້າ</div>
+        <div class="game-pack" id="productPack">ແພັກເກັດເຕີມເງິນ</div>
+      </div>
+      <div class="game-amount">
+        <span class="n num" id="productAmount">—</span>
+        <span class="u" id="productUnit"></span>
+      </div>
+    </div>
+
+    <div class="perforation"></div>
+
+    <div class="ticket-bottom">
+      <div class="field-row">
+        <div class="field">
+          <label>Player ID</label>
+          <input type="text" id="playerId" placeholder="ໃສ່ Player ID ຂອງທ່ານ" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>Server</label>
+          <select id="serverName">
+            <option value="">ເລືອກ Server</option>
+            <option value="Asia">Asia</option>
+            <option value="SEA">SEA</option>
+            <option value="Global">Global</option>
+            <option value="ອື່ນໆ">ອື່ນໆ</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">ວິທີຊຳລະເງິນ</div>
+  <div class="pay-methods" id="payMethods">
+    <div class="pay-opt" data-pay="bank">
+      <div class="ic">🏦</div>
+      <div class="lb">ໂອນທະນາຄານ</div>
+    </div>
+    <div class="pay-opt" data-pay="promptpay">
+      <div class="ic">📱</div>
+      <div class="lb">ພ້ອມເພย์ / QR</div>
+    </div>
+    <div class="pay-opt" data-pay="wallet">
+      <div class="ic">👛</div>
+      <div class="lb">ວອລເລັດ</div>
+    </div>
+  </div>
+
+  <div class="section-title">ສະຫຼຸບຍອດ</div>
+  <div class="receipt">
+    <div class="receipt-row">
+      <span>ລາຄາສິນຄ້າ</span>
+      <span id="priceRow">0 ກີບ</span>
+    </div>
+    <div class="receipt-row">
+      <span>ຄ່າທຳນຽມ</span>
+      <span>0 ກີບ</span>
+    </div>
+    <div class="receipt-row total">
+      <span>ຍອດລວມສຸດທິ</span>
+      <span class="val num" id="totalRow">0</span>
+    </div>
+  </div>
+
+  <label class="confirm-check">
+    <input type="checkbox" id="confirmCheck">
+    <span>ຂ້ອຍໄດ້ກວດສອບ <b>Player ID</b> ແລະ <b>Server</b> ຖືກຕ້ອງແລ້ວ ຫາກຂໍ້ມູນຜິດພາດທາງຮ້ານຈະບໍ່ຮັບຜິດຊອບ</span>
+  </label>
+
+  <button class="buy-btn" id="buyBtn" disabled>🛒 ຢືນຢັນສັ່ງຊື້</button>
+  <div class="status-msg" id="statusMsg"></div>
+
+  <div class="trust">
+    <div class="trust-item"><div class="ic">⚡</div><div class="tx">ສົ່ງອັດຕະໂນມັດ<br>ພາຍໃນ 5 ນາທີ</div></div>
+    <div class="trust-item"><div class="ic">🔒</div><div class="tx">ປອດໄພ<br>100%</div></div>
+    <div class="trust-item"><div class="ic">💬</div><div class="tx">ຊ່ວຍເຫຼືອ<br>ຕະຫຼອດ 24 ຊມ.</div></div>
+  </div>
+
+</div>
+
+<script src="supabase.js"></script>
+<script>
+
+const params = new URLSearchParams(window.location.search);
+const productName = params.get("name") || "ບໍ່ລະບຸ";
+const productPrice = Number(params.get("price")) || 0;
+
+const AMOUNT_MAP = {
+  "PUBG Mobile": {amount:"300", unit:"UC", icon:"🔫"},
+  "ROBLOX": {amount:"400", unit:"Robux", icon:"🧱"},
+  "FREE FIRE": {amount:"355", unit:"Diamonds", icon:"🔥"},
+  "Minecraft": {amount:"1", unit:"Minecoin Pack", icon:"⛏️"},
+  "Valorant": {amount:"475", unit:"VP", icon:"🎯"},
+  "ROV": {amount:"300", unit:"Coupon", icon:"⚔️"},
+  "Steam": {amount:"1", unit:"Wallet Code", icon:"🕹️"},
+  "Genshin": {amount:"300", unit:"Genesis Crystal", icon:"💎"}
+};
+
+const info = AMOUNT_MAP[productName] || {amount:"—", unit:"ແພັກເກັດ", icon:"🎮"};
+
+document.getElementById("productName").innerText = productName;
+document.getElementById("gameIcon").innerText = info.icon;
+document.getElementById("productAmount").innerText = info.amount;
+document.getElementById("productUnit").innerText = info.unit;
+document.getElementById("priceRow").innerText = productPrice.toLocaleString("en-US") + " ກີບ";
+document.getElementById("totalRow").innerText = productPrice.toLocaleString("en-US") + " ກີບ";
+
+let selectedPay = null;
+
+document.querySelectorAll(".pay-opt").forEach(function(opt){
+  opt.addEventListener("click", function(){
+    document.querySelectorAll(".pay-opt").forEach(function(o){ o.classList.remove("selected"); });
+    opt.classList.add("selected");
+    selectedPay = opt.dataset.pay;
+    setStep(2, true);
+    validateForm();
+  });
+});
+
+const playerIdEl = document.getElementById("playerId");
+const serverEl = document.getElementById("serverName");
+const checkEl = document.getElementById("confirmCheck");
+const buyBtn = document.getElementById("buyBtn");
+
+[playerIdEl, serverEl, checkEl].forEach(function(el){
+  el.addEventListener("input", validateForm);
+  el.addEventListener("change", validateForm);
+});
+
+function validateForm(){
+  const ok = playerIdEl.value.trim().length > 0 &&
+             serverEl.value.length > 0 &&
+             selectedPay !== null &&
+             checkEl.checked;
+  buyBtn.disabled = !ok;
+  if(ok){ setStep(3); } else { setStep(2); }
+}
+
+function setStep(n, force){
+  const s1 = document.getElementById("step1");
+  const s2 = document.getElementById("step2");
+  const s3 = document.getElementById("step3");
+  const l1 = document.getElementById("line1");
+  const l2 = document.getElementById("line2");
+
+  [s1,s2,s3].forEach(function(s){ s.classList.remove("active","done"); });
+  l2.classList.remove("done");
+
+  s1.classList.add("done");
+  l1.classList.add("done");
+
+  if(n >= 3){
+    s2.classList.add("done");
+    l2.classList.add("done");
+    s3.classList.add("active");
+  } else {
+    s2.classList.add("active");
+  }
+}
+
+setStep(2);
+
+(async function(){
+  const {data:{session}} = await supabaseClient.auth.getSession();
+  if(!session){
+    buyBtn.disabled = true;
+    buyBtn.innerText = "🔒 ກະລຸນາເຂົ້າສູ່ລະບົບກ່ອນ";
+    document.getElementById("statusMsg").innerText = "ກຳລັງພາໄປໜ້າເຂົ້າສູ່ລະບົບ...";
+    setTimeout(function(){ location.href = "index.html"; }, 2000);
+  }
+})();
+
+buyBtn.addEventListener("click", async function(){
+  const {data:{user}} = await supabaseClient.auth.getUser();
+  if(!user){
+    location.href = "index.html";
+    return;
+  }
+
+  buyBtn.disabled = true;
+  buyBtn.classList.add("pulsing");
+  buyBtn.innerText = "ກຳລັງດຳເນີນການ...";
+  const statusMsg = document.getElementById("statusMsg");
+  statusMsg.style.color = "#999";
+  statusMsg.innerText = "";
+
+  const {data, error} = await supabaseClient
+    .from("orders")
+    .insert({
+      user_id: user.id,
+      user_email: user.email,
+      product_name: productName,
+      price: productPrice,
+      status: "pending",
+      player_id: playerIdEl.value.trim(),
+      server_name: serverEl.value,
+      payment_method: selectedPay
+    })
+    .select()
+    .single();
+
+  if(error){
+    statusMsg.style.color = "#ff5a5a";
+    statusMsg.innerText = "ເກີດຂໍ້ຜິດພາດ: " + error.message;
+    buyBtn.disabled = false;
+    buyBtn.classList.remove("pulsing");
+    buyBtn.innerText = "🛒 ຢືນຢັນສັ່ງຊື້";
+    return;
+  }
+
+  buyBtn.innerText = "✅ ສັ່ງແລ້ວ #" + data.id;
+  statusMsg.style.color = "#3ddc73";
+  statusMsg.innerText = "ທີມງານຈະສົ່ງຂອງພາຍໃນ 5 ນາທີ ຫຼັງຢືນຢັນການຊຳລະເງິນຜ່ານ Discord";
+});
+
+</script>
+</body>
+</html>
