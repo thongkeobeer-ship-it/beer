@@ -181,8 +181,29 @@ body{ background:var(--bg); color:#fff; padding-bottom:40px; }
 <script src="supabase.js"></script>
 <script>
 
+const ADMIN_EMAIL = "thongkeobeer@gmail.com";
+
 let currentFilter = "all";
 let allOrders = [];
+
+(async function checkAdmin(){
+  const {data:{user}} = await supabaseClient.auth.getUser();
+
+  if(!user){
+    alert("กรุณาล็อกอินก่อน");
+    location.href = "index.html";
+    return;
+  }
+
+  if(user.email !== ADMIN_EMAIL){
+    alert("หน้านี้สำหรับแอดมินเท่านั้น");
+    location.href = "index.html";
+    return;
+  }
+
+  loadOrders();
+})();
+
 
 async function loadOrders(){
   const list = document.getElementById("orderList");
@@ -275,8 +296,6 @@ document.querySelectorAll(".f-chip").forEach(function(chip){
     renderList();
   });
 });
-
-loadOrders();
 
 </script>
 </body>
