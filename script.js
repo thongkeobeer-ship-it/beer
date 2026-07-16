@@ -281,15 +281,11 @@ async function updateUser(){
 // ===============================
 
 async function goProduct(name, price, stock){
-    // TEMP: ปิดการบังคับล็อกอินไว้ก่อนระหว่างพัฒนาเว็บ
-    // เสร็จแล้วเอา /* */ ออกเพื่อเปิดกลับคืน
-    /*
     const {data:{user}} = await supabaseClient.auth.getUser();
     if(!user){
         openLogin();
         return;
     }
-    */
     let url = "product.html?name=" + encodeURIComponent(name);
     if(price !== undefined) url += "&price=" + encodeURIComponent(price);
     if(stock !== undefined) url += "&stock=" + encodeURIComponent(stock);
