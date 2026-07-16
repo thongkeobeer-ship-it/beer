@@ -262,7 +262,7 @@ body{ background:var(--bg); color:#fff; padding-bottom:40px; }
       <span class="num" id="payTotal">0 ກີບ</span>
     </div>
 
-    <img src="img/qr.jpg" class="pay-qr" alt="QR โอนเงิน">
+    <img src="img/qr.jpeg" class="pay-qr" alt="QR โอนเงิน" onerror="this.parentElement.querySelector('.pay-hint').insertAdjacentHTML('beforebegin','<div style=&quot;color:#ff5a5a;font-size:12px;margin:8px 0;&quot;>⚠️ ไม่พบรูป QR — ตรวจสอบว่าอัปโหลด img/qr.jpeg ขึ้น GitHub แล้ว</div>')">
 
     <div class="pay-hint">ສະແກນ QR ເພື່ອໂອນເງິນ ແລ້ວແນບສະລິບການໂອນຂ້າງລຸ່ມນີ້</div>
 
