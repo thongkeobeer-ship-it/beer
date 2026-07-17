@@ -52,16 +52,16 @@ const PRODUCTS = [
   {name:"Roblox PC", cat:"pc-other", price:0, stock:0, icon:"🧱"},
 
   // ===== บัตรเติมเงิน (10) =====
-  {name:"ບັດ50", cat:"topup", price:45, stock:0, icon:"💳"},
-  {name:"ບັດ100", cat:"topup", price:95, stock:0, icon:"💳"},
-  {name:"ບັດ150", cat:"topup", price:145, stock:0, icon:"💳"},
-  {name:"ບັດ200", cat:"topup", price:195, stock:0, icon:"💳"},
-  {name:"ບັດ250", cat:"topup", price:245, stock:0, icon:"💳"},
-  {name:"ບັດ300", cat:"topup", price:295, stock:0, icon:"💳"},
-  {name:"ບັດ350", cat:"topup", price:345, stock:0, icon:"💳"},
-  {name:"ບັດ400", cat:"topup", price:395, stock:0, icon:"💳"},
-  {name:"ບັດ450", cat:"topup", price:445, stock:0, icon:"💳"},
-  {name:"ບັດ500", cat:"topup", price:495, stock:0, icon:"💳"}
+  {name:"50💰", cat:"topup", price:55, stock:0, icon:"💳"},
+  {name:"100💰", cat:"topup", price:105, stock:0, icon:"💳"},
+  {name:"150💰", cat:"topup", price:155, stock:0, icon:"💳"},
+  {name:"200💰", cat:"topup", price:205, stock:0, icon:"💳"},
+  {name:"250💰", cat:"topup", price:255, stock:0, icon:"💳"},
+  {name:"300💰", cat:"topup", price:305, stock:0, icon:"💳"},
+  {name:"350💰", cat:"topup", price:355, stock:0, icon:"💳"},
+  {name:"400💰", cat:"topup", price:405, stock:0, icon:"💳"},
+  {name:"450💰", cat:"topup", price:455, stock:0, icon:"💳"},
+  {name:"500💰", cat:"topup", price:505, stock:0, icon:"💳"}
 ];
 
 const GRADIENTS = [
