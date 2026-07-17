@@ -4,7 +4,7 @@
 // ===============================
 const PRODUCTS = [
   // ===== มือถือ - Battle/Shooter (10) =====
-  {name:"PUBG Mobile", cat:"mobile-battle", price:0, stock:0, icon:"🔫"},
+  {name:"PUBG Mobile", cat:"mobile-battle", price:10, stock:0, icon:"🔫"},
   {name:"Free Fire", cat:"mobile-battle", price:0, stock:0, icon:"🔥"},
   {name:"Free Fire Max", cat:"mobile-battle", price:0, stock:0, icon:"💥"},
   {name:"Mobile Legends", cat:"mobile-battle", price:0, stock:0, icon:"⚔️"},
