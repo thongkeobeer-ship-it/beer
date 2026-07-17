@@ -52,16 +52,16 @@ const PRODUCTS = [
   {name:"Roblox PC", cat:"pc-other", price:0, stock:0, icon:"🧱"},
 
   // ===== บัตรเติมเงิน (10) =====
-  {name:"Google Play Gift Card", cat:"topup", price:0, stock:0, icon:"🟢"},
-  {name:"App Store Gift Card", cat:"topup", price:0, stock:0, icon:"🍎"},
-  {name:"Garena Shell", cat:"topup", price:0, stock:0, icon:"🐚"},
-  {name:"Razer Gold", cat:"topup", price:0, stock:0, icon:"💰"},
-  {name:"iTunes Card", cat:"topup", price:0, stock:0, icon:"🎵"},
-  {name:"Amazon Gift Card", cat:"topup", price:0, stock:0, icon:"📦"},
-  {name:"PlayStation Wallet", cat:"topup", price:0, stock:0, icon:"🎮"},
-  {name:"Xbox Gift Card", cat:"topup", price:0, stock:0, icon:"❎"},
-  {name:"Nintendo eShop Card", cat:"topup", price:0, stock:0, icon:"🍄"},
-  {name:"Netflix Gift Card", cat:"topup", price:0, stock:0, icon:"🎬"}
+  {name:"ບັດ50", cat:"topup", price:45, stock:0, icon:"💳"},
+  {name:"ບັດ100", cat:"topup", price:95, stock:0, icon:"💳"},
+  {name:"ບັດ150", cat:"topup", price:145, stock:0, icon:"💳"},
+  {name:"ບັດ200", cat:"topup", price:195, stock:0, icon:"💳"},
+  {name:"ບັດ250", cat:"topup", price:245, stock:0, icon:"💳"},
+  {name:"ບັດ300", cat:"topup", price:295, stock:0, icon:"💳"},
+  {name:"ບັດ350", cat:"topup", price:345, stock:0, icon:"💳"},
+  {name:"ບັດ400", cat:"topup", price:395, stock:0, icon:"💳"},
+  {name:"ບັດ450", cat:"topup", price:445, stock:0, icon:"💳"},
+  {name:"ບັດ500", cat:"topup", price:495, stock:0, icon:"💳"}
 ];
 
 const GRADIENTS = [
