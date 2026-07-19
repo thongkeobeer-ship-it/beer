@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ປະຫວັດການສັ່ງຊື້ - 𝐃𝐄𝐊 𝐌𝐀𝐒𝐇 𝐒𝐇𝐎𝐏</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; font-family:'Kanit',Arial,sans-serif; -webkit-tap-highlight-color:transparent; }
+
+:root{
+  --bg:#0a0e16;
+  --card:#12161f;
+  --line:#1c2733;
+  --blue:#ff4d4d;
+  --blue2:#ff8080;
+  --green:#3ddc9a;
+  --red:#ff7a86;
+  --muted:#9db4c7;
+  --gold:#ffd873;
+}
+
+body{
+  background-image:
+    radial-gradient(circle at 15% 0%, rgba(255,77,77,.07), transparent 40%);
+  background-color:var(--bg);
+  background-repeat:no-repeat;
+  background-size:220% 220%;
+  animation:bgGlowDrift 18s ease-in-out infinite;
+  color:#fff;
+  padding-bottom:40px;
+}
+@keyframes bgGlowDrift{
+  0%,100%{ background-position:0% 0%; }
+  50%{ background-position:24% 18%; }
+}
+.num{ font-family:'Orbitron',sans-serif; }
+
+.topbar{
+  display:flex; align-items:center; gap:12px;
+  padding:16px; position:sticky; top:0;
+  background:rgba(10,14,22,.85);
+  backdrop-filter:blur(14px);
+  z-index:50;
+  border-bottom:1px solid var(--line);
+}
+.back-btn{
+  width:38px; height:38px; border-radius:50%;
+  background:var(--card); border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; text-decoration:none; font-size:18px; flex-shrink:0;
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1);
+}
+.back-btn:active{ transform:scale(.9); }
+.topbar-title{ font-weight:700; font-size:16px; }
+
+.wrap{ max-width:480px; margin:0 auto; padding:16px; }
+
+.tabs{
+  display:flex;
+  gap:8px;
+  max-width:480px;
+  margin:0 auto;
+  padding:0 16px 4px;
+}
+.tab-btn{
+  flex:1;
+  text-align:center;
+  padding:10px;
+  border-radius:12px;
+  background:var(--card);
+  border:1px solid var(--line);
+  color:var(--muted);
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+}
+.tab-btn.active{
+  background:var(--blue);
+  border-color:var(--blue);
+  color:#04121c;
+}
+
+.empty-msg{
+  text-align:center;
+  color:var(--muted);
+  padding:60px 20px;
+  font-size:13.5px;
+}
+
+.order-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:14px;
+  box-shadow:0 4px 16px rgba(0,0,0,.2);
+}
+
+.order-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  margin-bottom:8px;
+}
+.order-id{ font-size:11px; color:var(--muted); }
+.order-status{
+  font-size:11px;
+  font-weight:700;
+  padding:4px 10px;
+  border-radius:12px;
+  flex-shrink:0;
+}
+.st-pending{ background:#3a2f0a; color:var(--gold); }
+.st-confirmed{ background:#0a3a1c; color:var(--green); }
+.st-rejected{ background:#3a0a0a; color:var(--red); }
+
+.order-name{ font-size:16px; font-weight:700; margin-bottom:4px; }
+.order-meta{ font-size:12.5px; color:var(--muted); margin-bottom:2px; }
+.order-price{ font-size:17px; font-weight:800; color:var(--gold); margin-top:8px; }
+
+.code-box{
+  margin-top:12px;
+  background:#050810;
+  border:1px dashed var(--green);
+  border-radius:12px;
+  padding:14px;
+  font-family:'Orbitron',sans-serif;
+  font-size:14px;
+  font-weight:700;
+  color:var(--green);
+  word-break:break-all;
+  white-space:pre-wrap;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.code-box .copy-mini{
+  background:linear-gradient(180deg,#4fe08a,#1ca652);
+  color:#04150a;
+  border:none;
+  border-radius:8px;
+  padding:8px 12px;
+  font-size:11px;
+  font-weight:700;
+  font-family:'Kanit',sans-serif;
+  cursor:pointer;
+  flex-shrink:0;
+}
+
+.pending-hint{
+  margin-top:10px;
+  font-size:12px;
+  color:var(--muted);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.spin-mini{
+  width:12px; height:12px;
+  border:2px solid var(--line);
+  border-top-color:var(--gold);
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+  flex-shrink:0;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+<a href="index.html" class="back-btn" onclick="if(window.history.length>1){event.preventDefault();history.back();}">‹</a>
+<div class="topbar-title" style="display:flex;align-items:center;gap:8px;"><img src="logo.png" style="width:38px;height:38px;border-radius:8px;object-fit:contain;">📋 ປະຫວັດ</div>
+</div>
+
+<div class="tabs">
+<div class="tab-btn active" id="tabOrders" onclick="switchTab('orders')">🛒 ການສັ່ງຊື້</div>
+<div class="tab-btn" id="tabTopups" onclick="switchTab('topups')">💰 ການເຕີມເງິນ</div>
+</div>
+
+<div class="wrap" id="orderList">
+<div class="empty-msg">ກຳລັງໂຫລດ...</div>
+</div>
+
+<script src="supabase.js"></script>
+<script>
+
+let activeTab = "orders";
+
+function switchTab(tab){
+  activeTab = tab;
+  document.getElementById("tabOrders").classList.toggle("active", tab === "orders");
+  document.getElementById("tabTopups").classList.toggle("active", tab === "topups");
+  if(tab === "orders") loadMyOrders();
+  else loadMyTopups();
+}
+
+async function loadMyOrders(){
+  const list = document.getElementById("orderList");
+  list.innerHTML = '<div class="empty-msg">ກຳລັງໂຫລດ...</div>';
+
+  const {data:{user}} = await supabaseClient.auth.getUser();
+  if(!user){
+    location.href = "index.html";
+    return;
+  }
+
+  const {data, error} = await supabaseClient
+    .from("orders")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  if(error){
+    list.innerHTML = '<div class="empty-msg">ໂຫລດບໍ່ສຳເລັດ: ' + error.message + '</div>';
+    return;
+  }
+
+  if(!data || data.length === 0){
+    list.innerHTML = '<div class="empty-msg">ທ່ານຍັງບໍ່ເຄີຍສັ່ງຊື້ສິນຄ້າ</div>';
+    return;
+  }
+
+  list.innerHTML = data.map(function(o){
+    const statusClass = "st-" + (o.status || "pending");
+    const statusLabel = o.status === "confirmed" ? "ຢືນຢັນແລ້ວ"
+      : o.status === "rejected" ? "ຖືກປະຕິເສດ"
+      : "ລໍຖ້າກວດສອບ";
+
+    const dateTxt = o.created_at ? new Date(o.created_at).toLocaleString("th-TH") : "-";
+
+    let extraHtml = "";
+    if(o.status === "confirmed"){
+      const code = (o.delivery_code && o.delivery_code.trim())
+        ? o.delivery_code
+        : "ກະລຸນາຕິດຕໍ່ແອດມິນຜ່ານ Discord";
+      extraHtml =
+        '<div class="code-box">' +
+          '<span>' + code + '</span>' +
+          '<button class="copy-mini" onclick="copyCode(this,\'' + code.replace(/'/g,"") + '\')">📋 ກັອບປີ້</button>' +
+        '</div>';
+    } else if(o.status === "rejected"){
+      extraHtml = '<div class="pending-hint">❌ ກະລຸນາຕິດຕໍ່ແອດມິນຜ່ານ Discord ເພື່ອສອບຖາມ</div>';
+    } else {
+      extraHtml = '<div class="pending-hint"><span class="spin-mini"></span> ' +
+        (o.paid_from_wallet ? "ຕັດເງິນຈາກກະເປົາແລ້ວ · ລໍຖ້າແອດມິນສົ່ງລະຫັດ" : "ແອດມິນກຳລັງກວດສອບສະລິບ") +
+        '</div>';
+    }
+
+    return (
+      '<div class="order-card">' +
+        '<div class="order-top">' +
+          '<div class="order-id">#' + o.id + ' · ' + dateTxt + '</div>' +
+          '<div class="order-status ' + statusClass + '">' + statusLabel + '</div>' +
+        '</div>' +
+        '<div class="order-name">🛒 ' + (o.product_name || "-") + '</div>' +
+        '<div class="order-meta">ຈຳນວນ: ' + (o.quantity || 1) + ' ອັນ</div>' +
+        '<div class="order-price">' + Number(o.price || 0).toLocaleString("de-DE") + ' ກີບ</div>' +
+        extraHtml +
+      '</div>'
+    );
+  }).join("");
+}
+
+async function loadMyTopups(){
+  const list = document.getElementById("orderList");
+  list.innerHTML = '<div class="empty-msg">ກຳລັງໂຫລດ...</div>';
+
+  const {data:{user}} = await supabaseClient.auth.getUser();
+  if(!user){
+    location.href = "index.html";
+    return;
+  }
+
+  const {data, error} = await supabaseClient
+    .from("topup_requests")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  if(error){
+    list.innerHTML = '<div class="empty-msg">ໂຫລດບໍ່ສຳເລັດ: ' + error.message + '</div>';
+    return;
+  }
+
+  if(!data || data.length === 0){
+    list.innerHTML = '<div class="empty-msg">ທ່ານຍັງບໍ່ເຄີຍເຕີມເງິນ</div>';
+    return;
+  }
+
+  list.innerHTML = data.map(function(t){
+    const statusClass = "st-" + (t.status || "pending");
+    const statusLabel = t.status === "confirmed" ? "ຢືນຢັນແລ້ວ"
+      : t.status === "rejected" ? "ຖືກປະຕິເສດ"
+      : "ລໍຖ້າກວດສອບ";
+
+    const dateTxt = t.created_at ? new Date(t.created_at).toLocaleString("th-TH") : "-";
+
+    const hint = t.status === "confirmed"
+      ? '<div class="pending-hint">✅ ຍອດເງິນຖືກເພີ່ມເຂົ້າກະເປົາແລ້ວ</div>'
+      : t.status === "rejected"
+        ? '<div class="pending-hint">❌ ກະລຸນາຕິດຕໍ່ແອດມິນຜ່ານ Discord ເພື່ອສອບຖາມ</div>'
+        : '<div class="pending-hint"><span class="spin-mini"></span> ແອດມິນກຳລັງກວດສອບສະລິບ</div>';
+
+    return (
+      '<div class="order-card">' +
+        '<div class="order-top">' +
+          '<div class="order-id">#' + t.id + ' · ' + dateTxt + '</div>' +
+          '<div class="order-status ' + statusClass + '">' + statusLabel + '</div>' +
+        '</div>' +
+        '<div class="order-name">💰 ເຕີມເງິນ</div>' +
+        '<div class="order-price">' + Number(t.amount || 0).toLocaleString("de-DE") + ' ກີບ</div>' +
+        hint +
+      '</div>'
+    );
+  }).join("");
+}
+
+function copyCode(btn, code){
+  navigator.clipboard.writeText(code).then(function(){
+    const old = btn.innerText;
+    btn.innerText = "✅ ແລ້ວ";
+    setTimeout(function(){ btn.innerText = old; }, 1500);
+  });
+}
+
+loadMyOrders();
+
+</script>
+</body>
+</html>
