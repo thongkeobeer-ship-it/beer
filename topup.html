@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ເຕີມເງິນ - 𝐃𝐄𝐊 𝐌𝐀𝐒𝐇 𝐒𝐇𝐎𝐏</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; font-family:'Kanit',Arial,sans-serif; -webkit-tap-highlight-color:transparent; }
+
+button, .back-btn, .amt-chip{ transition:transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease; }
+button:active, .back-btn:active, .amt-chip:active{ transform:scale(.92); }
+
+:root{
+  --bg:#0a0e16;
+  --card:#12161f;
+  --line:#1c2733;
+  --blue:#ff4d4d;
+  --blue2:#ff8080;
+  --green:#3ddc9a;
+  --muted:#9db4c7;
+  --gold:#ffd873;
+}
+
+body{
+  background:
+    radial-gradient(circle at 15% 0%, rgba(255,77,77,.10), transparent 40%),
+    var(--bg);
+  color:#fff;
+  padding-bottom:40px;
+}
+.num{ font-family:'Orbitron',sans-serif; }
+
+.topbar{
+  display:flex; align-items:center; gap:12px;
+  padding:16px; position:sticky; top:0;
+  background:rgba(10,14,22,.85);
+  backdrop-filter:blur(14px);
+  z-index:50;
+  border-bottom:1px solid var(--line);
+}
+.back-btn{
+  width:38px; height:38px; border-radius:50%;
+  background:var(--card); border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; text-decoration:none; font-size:18px; flex-shrink:0;
+}
+.topbar-title{ font-weight:700; font-size:16px; }
+
+.wrap{ max-width:480px; margin:0 auto; padding:0 16px; }
+
+.bal-card{
+  margin-top:16px;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:16px;
+  text-align:center;
+}
+.bal-card .lb{ font-size:12px; color:var(--muted); }
+.bal-card .val{ font-size:26px; font-weight:800; color:var(--green); margin-top:6px; }
+
+.section-title{ font-size:14px; font-weight:700; margin-top:22px; margin-bottom:10px; }
+
+.amt-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+.amt-chip{
+  background:var(--card);
+  border:1px solid var(--line);
+  color:#fff;
+  padding:14px;
+  border-radius:14px;
+  text-align:center;
+  font-weight:700;
+  font-size:14px;
+  cursor:pointer;
+}
+.amt-chip.active{
+  background:var(--blue);
+  border-color:var(--blue);
+  color:#04121c;
+}
+
+.custom-amt{
+  margin-top:10px;
+  width:100%;
+  padding:14px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background:var(--card);
+  color:#fff;
+  font-size:15px;
+  font-family:'Orbitron',sans-serif;
+  outline:none;
+}
+.custom-amt:focus{ border-color:var(--blue); }
+
+.buy-btn{
+  width:100%; margin-top:20px; padding:17px; border:none; border-radius:16px;
+  background:linear-gradient(180deg, var(--blue2), var(--blue));
+  color:#04121c; font-size:15px; font-weight:700; font-family:'Kanit',sans-serif;
+  cursor:pointer;
+}
+.buy-btn:disabled{ opacity:.4; filter:grayscale(.3); }
+
+.status-msg{ text-align:center; font-size:12.5px; margin-top:12px; min-height:16px; }
+
+.pay-section{
+  display:none;
+  margin-top:20px;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:20px;
+  text-align:center;
+}
+.pay-total{ font-size:13px; color:var(--muted); margin-bottom:4px; }
+.pay-total .num{ font-size:21px; font-weight:800; color:var(--gold); display:block; margin-top:3px; }
+.pay-qr{ width:220px; max-width:100%; margin:18px auto; border-radius:16px; border:1px solid var(--line); display:block; }
+.pay-hint{ font-size:12.5px; color:var(--muted); margin-bottom:16px; }
+
+.upload-box{
+  border:2px dashed var(--line);
+  border-radius:16px;
+  padding:20px;
+  cursor:pointer;
+  margin-bottom:16px;
+}
+.upload-box.has-file{ border-color:var(--green); background:rgba(61,220,154,.05); }
+.upload-box .up-ic{ font-size:28px; margin-bottom:6px; }
+.upload-box .up-tx{ font-size:13px; color:var(--muted); }
+.upload-box.has-file .up-tx{ color:var(--green); }
+.slip-preview{ max-width:100%; max-height:180px; border-radius:12px; margin-top:12px; display:none; }
+
+.confirm-btn{
+  width:100%; padding:17px; border:none; border-radius:16px;
+  background:linear-gradient(180deg, var(--blue2), var(--blue));
+  color:#04121c; font-size:15px; font-weight:700; font-family:'Kanit',sans-serif;
+  cursor:pointer;
+}
+.confirm-btn:disabled{ opacity:.4; filter:grayscale(.3); }
+.cancel-pay{ text-align:center; font-size:12.5px; color:var(--muted); margin-top:14px; cursor:pointer; text-decoration:underline; }
+
+.wait-section{
+  margin-top:18px; background:var(--card); border:1px solid var(--line);
+  border-radius:18px; padding:28px 18px; text-align:center; display:none;
+}
+.wait-icon{ font-size:44px; margin-bottom:10px; }
+.wait-title{ font-size:16px; font-weight:700; }
+.wait-hint{ font-size:12.5px; color:var(--muted); line-height:1.5; margin-top:8px; }
+.wait-spin{
+  width:26px; height:26px; margin:14px auto 0;
+  border:3px solid var(--line); border-top-color:var(--blue);
+  border-radius:50%; animation:spin 1s linear infinite;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+
+.done-section{
+  margin-top:18px; background:var(--card); border:1px solid var(--green);
+  border-radius:18px; padding:28px 18px; text-align:center; display:none;
+}
+.rejected-section{
+  margin-top:18px; background:var(--card); border:1px solid rgba(255,43,69,.4);
+  border-radius:18px; padding:28px 18px; text-align:center; display:none;
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+<a href="index.html" class="back-btn" onclick="if(window.history.length>1){event.preventDefault();history.back();}">‹</a>
+<div class="topbar-title" style="display:flex;align-items:center;gap:8px;"><img src="logo.png" style="width:38px;height:38px;border-radius:8px;object-fit:contain;">💰 ເຕີມເງິນເຂົ້າກະເປົາ</div>
+</div>
+
+<div class="wrap">
+
+  <div class="bal-card">
+    <div class="lb">ຍອດເງິນປັດຈຸບັນ</div>
+    <div class="val num" id="curBalance">— ກີບ</div>
+  </div>
+
+  <div class="section-title">ເລືອກຈຳນວນເງິນ</div>
+  <div class="amt-grid" id="amtGrid">
+    <div class="amt-chip" data-amt="20000">20,000 ກີບ</div>
+    <div class="amt-chip" data-amt="50000">50,000 ກີບ</div>
+    <div class="amt-chip" data-amt="100000">100,000 ກີບ</div>
+    <div class="amt-chip" data-amt="200000">200,000 ກີບ</div>
+  </div>
+  <input type="number" class="custom-amt" id="customAmt" placeholder="ຫຼືພິມຈຳນວນເອງ (ກີບ)" min="1000" step="1000">
+
+  <button class="buy-btn" id="nextBtn">ຕໍ່ໄປ</button>
+  <div class="status-msg" id="statusMsg"></div>
+
+  <!-- ===== QR + แนบสลิป ===== -->
+  <div class="pay-section" id="paySection">
+    <div class="pay-total">
+      ຍອດທີ່ຕ້ອງໂອນ
+      <span class="num" id="payTotal">0 ກີບ</span>
+    </div>
+
+    <img src="qr.jpeg" class="pay-qr" alt="QR ໂອນເງິນ" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend','<div style=&quot;color:#ff5a5a;font-size:12px;margin:8px 0;&quot;>⚠️ ບໍ່ພົບຮູບ QR — ກະລຸນາກວດສອບວ່າອັບໂຫລດໄຟລ໌ qr.jpeg ຂຶ້ນເທິງເວັບແລ້ວ</div>')">
+
+    <div class="pay-hint">ສະແກນ QR ເພື່ອໂອນເງິນ ແລ້ວແນບສະລິບການໂອນຂ້າງລຸ່ມນີ້</div>
+
+    <label class="upload-box" id="uploadBox" for="slipInput">
+      <div class="up-ic">📎</div>
+      <div class="up-tx" id="uploadTx">ແຕະເພື່ອແນບສະລິບ</div>
+      <img class="slip-preview" id="slipPreview">
+    </label>
+    <input type="file" id="slipInput" accept="image/*" style="display:none;">
+
+    <button class="confirm-btn" id="confirmBtn" disabled>✅ ຢືນຢັນການໂອນເງິນ</button>
+    <div class="cancel-pay" id="cancelPay">ຍົກເລີກ</div>
+  </div>
+
+  <!-- ===== รอแอดมินยืนยัน ===== -->
+  <div class="wait-section" id="waitSection">
+    <div class="wait-icon">⏳</div>
+    <div class="wait-title">ລໍຖ້າການຢືນຢັນຈາກແອດມິນ</div>
+    <div class="wait-hint">ແອດມິນກຳລັງກວດສອບສະລິບ ຍອດເງິນຈະຖືກເພີ່ມເຂົ້າກະເປົາອັດຕະໂນມັດ</div>
+    <div class="wait-spin"></div>
+  </div>
+
+  <!-- ===== สำเร็จ ===== -->
+  <div class="done-section" id="doneSection">
+    <div style="font-size:40px;">✅</div>
+    <div style="font-weight:700;font-size:15px;margin-top:6px;">ເຕີມເງິນສຳເລັດ!</div>
+    <div class="wait-hint" id="doneMsg"></div>
+    <button class="buy-btn" style="margin-top:16px;" onclick="location.href='product.html'">🛒 ໄປຊື້ສິນຄ້າ</button>
+  </div>
+
+  <!-- ===== ถูกปฏิเสธ ===== -->
+  <div class="rejected-section" id="rejectedSection">
+    <div style="font-size:40px;">❌</div>
+    <div style="font-weight:700;font-size:15px;margin-top:6px;">ຄຳຂໍເຕີມເງິນຖືກປະຕິເສດ</div>
+    <div class="wait-hint">ກະລຸນາຕິດຕໍ່ແອດມິນຜ່ານ Discord ເພື່ອສອບຖາມ</div>
+  </div>
+
+</div>
+
+<script src="supabase.js"></script>
+<script>
+
+let selectedAmount = 0;
+
+async function loadBalance(){
+  const {data:{user}} = await supabaseClient.auth.getUser();
+  if(!user){
+    location.href = "index.html";
+    return;
+  }
+  await supabaseClient.rpc("ensure_wallet");
+  const {data, error} = await supabaseClient
+    .from("wallets")
+    .select("balance")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const bal = (!error && data) ? Number(data.balance) : 0;
+  document.getElementById("curBalance").innerText = bal.toLocaleString("de-DE") + " ກີບ";
+}
+loadBalance();
+
+// รับ ?amount=... จากหน้าสินค้า (กรณียอดไม่พอ) มาตั้งเป็นค่าเริ่มต้น
+const prefill = Number(new URLSearchParams(window.location.search).get("amount"));
+if(prefill > 0){
+  document.getElementById("customAmt").value = prefill;
+  selectedAmount = prefill;
+}
+
+document.querySelectorAll(".amt-chip").forEach(function(chip){
+  chip.addEventListener("click", function(){
+    document.querySelectorAll(".amt-chip").forEach(c => c.classList.remove("active"));
+    this.classList.add("active");
+    selectedAmount = Number(this.dataset.amt);
+    document.getElementById("customAmt").value = "";
+  });
+});
+
+document.getElementById("customAmt").addEventListener("input", function(){
+  document.querySelectorAll(".amt-chip").forEach(c => c.classList.remove("active"));
+  selectedAmount = Number(this.value) || 0;
+});
+
+const paySection = document.getElementById("paySection");
+const nextBtn = document.getElementById("nextBtn");
+const uploadBox = document.getElementById("uploadBox");
+const uploadTx = document.getElementById("uploadTx");
+const slipInput = document.getElementById("slipInput");
+const slipPreview = document.getElementById("slipPreview");
+const confirmBtn = document.getElementById("confirmBtn");
+const cancelPay = document.getElementById("cancelPay");
+let selectedSlipFile = null;
+
+nextBtn.addEventListener("click", function(){
+  const statusMsg = document.getElementById("statusMsg");
+  if(!selectedAmount || selectedAmount < 1000){
+    statusMsg.style.color = "#ff5a5a";
+    statusMsg.innerText = "ກະລຸນາເລືອກ ຫຼື ພິມຈຳນວນເງິນ (ຢ່າງນ້ອຍ 1,000 ກີບ)";
+    return;
+  }
+  statusMsg.innerText = "";
+  document.getElementById("payTotal").innerText = selectedAmount.toLocaleString("de-DE") + " ກີບ";
+  nextBtn.style.display = "none";
+  paySection.style.display = "block";
+});
+
+cancelPay.addEventListener("click", function(){
+  paySection.style.display = "none";
+  nextBtn.style.display = "block";
+  selectedSlipFile = null;
+  slipInput.value = "";
+  slipPreview.style.display = "none";
+  uploadBox.classList.remove("has-file");
+  uploadTx.innerText = "ແຕະເພື່ອແນບສະລິບ";
+  confirmBtn.disabled = true;
+});
+
+slipInput.addEventListener("change", function(){
+  const file = this.files[0];
+  if(!file) return;
+  selectedSlipFile = file;
+  uploadBox.classList.add("has-file");
+  uploadTx.innerText = "✅ " + file.name;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    slipPreview.src = e.target.result;
+    slipPreview.style.display = "block";
+  };
+  reader.readAsDataURL(file);
+  confirmBtn.disabled = false;
+});
+
+confirmBtn.addEventListener("click", async function(){
+  if(!selectedSlipFile) return;
+
+  const {data:{user}} = await supabaseClient.auth.getUser();
+  if(!user){
+    location.href = "index.html";
+    return;
+  }
+
+  confirmBtn.disabled = true;
+  confirmBtn.innerText = "ກຳລັງອັບໂຫລດສະລິບ...";
+  const statusMsg = document.getElementById("statusMsg");
+  statusMsg.style.color = "#999";
+  statusMsg.innerText = "";
+
+  const fileExt = selectedSlipFile.name.split(".").pop();
+  const fileName = "topup_" + Date.now() + "_" + Math.floor(Math.random()*10000) + "." + fileExt;
+
+  const { error: uploadError } = await supabaseClient
+    .storage
+    .from("slips")
+    .upload(fileName, selectedSlipFile);
+
+  if(uploadError){
+    statusMsg.style.color = "#ff5a5a";
+    statusMsg.innerText = "ອັບໂຫລດສະລິບບໍ່ສຳເລັດ: " + uploadError.message;
+    confirmBtn.disabled = false;
+    confirmBtn.innerText = "✅ ຢືນຢັນການໂອນເງິນ";
+    return;
+  }
+
+  const { data: urlData } = supabaseClient.storage.from("slips").getPublicUrl(fileName);
+
+  const {data, error} = await supabaseClient
+    .from("topup_requests")
+    .insert({
+      user_id: user.id,
+      user_email: user.email,
+      amount: selectedAmount,
+      slip_url: urlData.publicUrl,
+      status: "pending"
+    })
+    .select()
+    .single();
+
+  if(error){
+    statusMsg.style.color = "#ff5a5a";
+    statusMsg.innerText = "ບັນທຶກຄຳຂໍບໍ່ສຳເລັດ: " + error.message;
+    confirmBtn.disabled = false;
+    confirmBtn.innerText = "✅ ຢືນຢັນການໂອນເງິນ";
+    return;
+  }
+
+  paySection.style.display = "none";
+  startWaitingScreen(data.id);
+});
+
+function startWaitingScreen(topupId){
+  document.getElementById("waitSection").style.display = "block";
+  let finished = false;
+
+  function handleUpdate(row){
+    if(finished || !row) return;
+    if(row.status === "confirmed"){
+      finished = true;
+      clearInterval(pollInterval);
+      channel.unsubscribe();
+      document.getElementById("waitSection").style.display = "none";
+      document.getElementById("doneMsg").innerText =
+        "ຍອດເງິນ " + selectedAmount.toLocaleString("de-DE") + " ກີບ ຖືກເພີ່ມເຂົ້າກະເປົາຂອງທ່ານແລ້ວ";
+      document.getElementById("doneSection").style.display = "block";
+      loadBalance();
+    } else if(row.status === "rejected"){
+      finished = true;
+      clearInterval(pollInterval);
+      channel.unsubscribe();
+      document.getElementById("waitSection").style.display = "none";
+      document.getElementById("rejectedSection").style.display = "block";
+    }
+  }
+
+  const channel = supabaseClient
+    .channel("topup-" + topupId)
+    .on(
+      "postgres_changes",
+      { event: "UPDATE", schema: "public", table: "topup_requests", filter: "id=eq." + topupId },
+      function(payload){ handleUpdate(payload.new); }
+    )
+    .subscribe();
+
+  const pollInterval = setInterval(async function(){
+    const { data: row, error } = await supabaseClient
+      .from("topup_requests")
+      .select("status")
+      .eq("id", topupId)
+      .single();
+    if(error) return;
+    handleUpdate(row);
+  }, 10000);
+}
+
+</script>
+</body>
+</html>
