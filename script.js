@@ -2,27 +2,27 @@
 // PRODUCT DATA (20 items) - ราคาตั้งเป็น 0 ทั้งหมดก่อน (เว็บยังไม่เสร็จ)
 // ===============================
 const PRODUCTS = [
-  {name:"PUBG Mobile", cat:"mobile-battle", price:0, stock:0, icon:"🔫"},
-  {name:"Free Fire", cat:"mobile-battle", price:0, stock:0, icon:"🔥"},
-  {name:"Free Fire Max", cat:"mobile-battle", price:0, stock:0, icon:"💥"},
-  {name:"Mobile Legends", cat:"mobile-battle", price:0, stock:0, icon:"⚔️"},
-  {name:"Call of Duty Mobile", cat:"mobile-battle", price:0, stock:0, icon:"🎯"},
-  {name:"ROV", cat:"mobile-battle", price:0, stock:0, icon:"🛡️"},
-  {name:"Wild Rift", cat:"mobile-battle", price:0, stock:0, icon:"🏹"},
-  {name:"Standoff 2", cat:"mobile-battle", price:0, stock:0, icon:"🔫"},
-  {name:"Clash Royale", cat:"mobile-battle", price:0, stock:0, icon:"👑"},
-  {name:"Brawl Stars", cat:"mobile-battle", price:0, stock:0, icon:"🌟"},
+  {name:"PROXY-UID", cat:"mobile-battle", price:0, stock:0, icon:"🔫"},
+  {name:"PROXY-RM", cat:"mobile-battle", price:0, stock:0, icon:"🔥"},
+  {name:"PROXY-B-GOD", cat:"mobile-battle", price:0, stock:0, icon:"💥"},
+  {name:"PROXY-VIP", cat:"mobile-battle", price:0, stock:0, icon:"⚔️"},
+  {name:"DRIP-ANDROID", cat:"mobile-battle", price:0, stock:0, icon:"🎯"},
+  {name:"HG-CHEATS", cat:"mobile-battle", price:0, stock:0, icon:"🛡️"},
+  {name:"DRIP-PROXY", cat:"mobile-battle", price:0, stock:0, icon:"🏹"},
+  {name:"PROXY AD", cat:"mobile-battle", price:0, stock:0, icon:"🔫"},
+  {name:"PROXY-X2", cat:"mobile-battle", price:0, stock:0, icon:"👑"},
+  {name:"PROXY-NABEE", cat:"mobile-battle", price:0, stock:0, icon:"🌟"},
 
-  {name:"Genshin Impact", cat:"mobile-casual", price:0, stock:0, icon:"💎"},
-  {name:"Honkai Star Rail", cat:"mobile-casual", price:0, stock:0, icon:"🌌"},
-  {name:"Clash of Clans", cat:"mobile-casual", price:0, stock:0, icon:"🏰"},
-  {name:"Asphalt 9", cat:"mobile-casual", price:0, stock:0, icon:"🏎️"},
-  {name:"ROBLOX", cat:"mobile-casual", price:0, stock:0, icon:"🧱"},
-  {name:"Subway Surfers", cat:"mobile-casual", price:0, stock:0, icon:"🚇"},
-  {name:"Identity V", cat:"mobile-casual", price:0, stock:0, icon:"🎭"},
-  {name:"Lords Mobile", cat:"mobile-casual", price:0, stock:0, icon:"🏯"},
-  {name:"State of Survival", cat:"mobile-casual", price:0, stock:0, icon:"🧟"},
-  {name:"Speed Drifters", cat:"mobile-casual", price:0, stock:0, icon:"🚗"}
+  {name:"ยังไม่มีชื่อสินค้าที่จะขาย", cat:"mobile-casual", price:0, stock:0, icon:"💎"},
+  {name:"ยังไม่มีชื่อสินค้าที่จะขาย", cat:"mobile-casual", price:0, stock:0, icon:"🌌"},
+  {name:"ยังไม่มีชื่อสินค้าที่จะขาย", cat:"mobile-casual", price:0, stock:0, icon:"🏰"},
+  {name:"ยังไม่มีชื่อสินค้าที่จะขาย", cat:"mobile-casual", price:0, stock:0, icon:"🏎️"},
+  {name:"GBOX IOS", cat:"mobile-casual", price:0, stock:0, icon:"🧱"},
+  {name:"𝐃𝐄𝐀𝐓𝐇-𝐌𝐎𝐃", cat:"mobile-casual", price:0, stock:0, icon:"🚇"},
+  {name:"IDENTIC IOS", cat:"mobile-casual", price:0, stock:0, icon:"🎭"},
+  {name:"𝐅𝐈𝐮𝐨𝐫𝐢𝐭𝐞-𝐈𝐎𝐒", cat:"mobile-casual", price:0, stock:0, icon:"🏯"},
+  {name:"APP-CODE-IOS-Lv8-30", cat:"mobile-casual", price:0, stock:0, icon:"🧟"},
+  {name:"APP-CODE-AD-Lv8-30", cat:"mobile-casual", price:0, stock:0, icon:"🚗"}
 ];
 
 const GRADIENTS = [
