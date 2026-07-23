@@ -414,6 +414,56 @@ body{
 .frame-royal::before{ background:conic-gradient(from 0deg, #4a1a80 0%, #ffd873 10%, #fff3d0 16%, #b366ff 30%, #4a1a80 45%, #ffd873 60%, #fff3d0 66%, #6a1fd0 80%, #4a1a80 100%); animation:frameSpin 3.8s linear infinite, royalHueShiftSm 6s linear infinite; }
 .frame-royal::after{ background:radial-gradient(circle, rgba(179,102,255,.6) 0%, rgba(255,215,115,.45) 55%, transparent 78%); animation:frameGlowPulseSm 1.8s ease-in-out infinite; }
 @keyframes royalHueShiftSm{ 0%{ filter:hue-rotate(0deg) saturate(1); } 50%{ filter:hue-rotate(35deg) saturate(1.3); } 100%{ filter:hue-rotate(0deg) saturate(1); } }
+
+/* มินิเอฟเฟกต์เพิ่มเติมรอบอวตารเล็ก (ปุ่มบัญชี/ทิกเกอร์) ให้ตรงกับกรอบใหญ่ในหน้าโปรไฟล์ — ใช้รูปทรง CSS ล้วน ไม่ใช้อิโมจิ */
+.u-fx{ position:absolute; z-index:4; pointer-events:none; opacity:0; }
+.u-fx-bolt{
+  width:7px; height:11px;
+  background:linear-gradient(180deg,#fff3d0,#ff8080 45%,#ff4d4d);
+  clip-path:polygon(58% 0%, 0% 58%, 42% 58%, 34% 100%, 100% 40%, 52% 40%);
+  filter:drop-shadow(0 0 3px #ff4d4d);
+  animation:uBoltFlicker 1.8s ease-in-out infinite;
+}
+@keyframes uBoltFlicker{
+  0%,100%{ opacity:0; } 8%,18%{ opacity:1; } 26%{ opacity:0; } 55%,68%{ opacity:1; } 78%{ opacity:0; }
+}
+.u-fx-star{
+  width:7px; height:7px;
+  background:linear-gradient(180deg,#fff,#7fe0ff);
+  clip-path:polygon(50% 0%, 61% 38%, 98% 38%, 68% 60%, 79% 95%, 50% 74%, 21% 95%, 32% 60%, 2% 38%, 39% 38%);
+  filter:drop-shadow(0 0 3px #7fe0ff);
+  animation:uSparkleTwinkle 2.2s ease-in-out infinite;
+}
+.u-fx-gem{
+  width:6px; height:8px;
+  background:linear-gradient(180deg,#eafffc,#2dd4c8);
+  clip-path:polygon(50% 0%, 100% 38%, 80% 100%, 20% 100%, 0% 38%);
+  filter:drop-shadow(0 0 3px #2dd4c8);
+  animation:uSparkleTwinkle 2.2s ease-in-out infinite;
+}
+@keyframes uSparkleTwinkle{
+  0%,100%{ opacity:0; transform:scale(.3) rotate(0deg); }
+  45%{ opacity:1; transform:scale(1.1) rotate(160deg); }
+  60%{ opacity:.6; transform:scale(.85) rotate(200deg); }
+}
+.frame-gray .u-fx-star{ background:linear-gradient(180deg,#eafffc,#2dd4c8); filter:drop-shadow(0 0 3px #2dd4c8); }
+.frame-royal .u-fx-star, .frame-royal .u-fx-gem{ background:linear-gradient(180deg,#ffd873,#b366ff); filter:drop-shadow(0 0 3px #ffd873); }
+.u-fx-crown{
+  width:16px; height:10px;
+  transform:translateX(-50%);
+  background:linear-gradient(180deg,#ffd873,#fff3d0 45%,#b366ff);
+  clip-path:polygon(0% 100%, 0% 42%, 20% 62%, 35% 18%, 50% 55%, 65% 18%, 80% 62%, 100% 42%, 100% 100%);
+  filter:drop-shadow(0 0 3px rgba(255,215,115,.8));
+  opacity:1;
+  animation:uCrownBob 2s ease-in-out infinite;
+}
+@keyframes uCrownBob{
+  0%,100%{ transform:translateX(-50%) translateY(0) rotate(-6deg); }
+  50%{ transform:translateX(-50%) translateY(-3px) rotate(6deg); }
+}
+@media (prefers-reduced-motion: reduce){
+  .u-fx-bolt, .u-fx-star, .u-fx-gem, .u-fx-crown{ animation:none; opacity:1; }
+}
 @media (prefers-reduced-motion: reduce){
   .u-frame-wrap::before, .u-frame-wrap::after, .u-frame-wrap .u-avatar::after{ animation:none; }
 }

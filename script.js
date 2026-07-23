@@ -476,6 +476,26 @@ function getAccountFrameClass(total){
   for(const t of ACCOUNT_BTN_TIERS){ if(total >= t.min) return t.frameClass; }
   return "";
 }
+// เอฟเฟกต์เพิ่มเติมรอบอวตารเล็ก (ปุ่มบัญชี/ทิกเกอร์) — เวอร์ชันย่อของเอฟเฟกในหน้าโปรไฟล์ ไม่ใช้อิโมจิ
+function buildMiniFrameFx(frameClass){
+  if(frameClass === "frame-red"){
+    return '<span class="u-fx u-fx-bolt" style="top:-5px;left:1px;animation-delay:0s;"></span>' +
+           '<span class="u-fx u-fx-bolt" style="bottom:-4px;right:-2px;animation-delay:.5s;"></span>';
+  }
+  if(frameClass === "frame-gray"){
+    return '<span class="u-fx u-fx-gem" style="top:-4px;right:0px;animation-delay:0s;"></span>' +
+           '<span class="u-fx u-fx-star" style="bottom:-4px;left:-2px;animation-delay:.4s;"></span>';
+  }
+  if(frameClass === "frame-blue"){
+    return '<span class="u-fx u-fx-star" style="top:-4px;left:0px;animation-delay:0s;"></span>' +
+           '<span class="u-fx u-fx-star" style="bottom:-4px;right:-2px;animation-delay:.4s;"></span>';
+  }
+  if(frameClass === "frame-royal"){
+    return '<span class="u-fx u-fx-crown" style="top:-9px;left:50%;"></span>' +
+           '<span class="u-fx u-fx-star" style="bottom:-4px;right:-3px;animation-delay:.3s;"></span>';
+  }
+  return "";
+}
 // บัญชีที่ avatar_all_frames = true เลือกกรอบเองได้ทุกแบบ ไม่ผูกกับยอดเติมสะสมจริง
 function resolveFrameClass(prof){
   if(prof && prof.avatar_all_frames){
@@ -512,7 +532,7 @@ async function updateUser(){
                 ? '<img src="' + avatarUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" alt="">'
                 : avatarEmoji;
             btn.innerHTML = frameClass
-                ? '<span class="u-frame-wrap ' + frameClass + '" style="width:100%;height:100%;"><span class="u-avatar" style="width:100%;height:100%;border:none;background:transparent;font-size:20px;overflow:hidden;">' + avatarInner + '</span></span>'
+                ? '<span class="u-frame-wrap ' + frameClass + '" style="width:100%;height:100%;">' + buildMiniFrameFx(frameClass) + '<span class="u-avatar" style="width:100%;height:100%;border:none;background:transparent;font-size:20px;overflow:hidden;">' + avatarInner + '</span></span>'
                 : avatarInner;
             btn.style.borderColor = "#7dff6a";
 
@@ -787,7 +807,7 @@ async function loadUserTicker(){
       const frameClass = resolveFrameClass(u);
       return (
         '<div class="user-chip">' +
-          '<span class="u-frame-wrap ' + frameClass + '"><span class="u-avatar">' + avatar + '</span></span>' +
+          '<span class="u-frame-wrap ' + frameClass + '">' + buildMiniFrameFx(frameClass) + '<span class="u-avatar">' + avatar + '</span></span>' +
           '<span class="u-name">' + name + '</span>' +
         '</div>'
       );
