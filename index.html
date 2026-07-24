@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>𝐃𝐄𝐊 𝐌𝐀𝐒𝐇 𝐒𝐇𝐎𝐏</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+/* ===== ตัวแปรสีพื้นหลังการ์ด =====
+   ตรงกับ .card{background:#12161f;} ใน style.css ทำให้ไล่สีขอบล่างรูปกลืนกับตัวการ์ดพอดี */
+:root{
+  --card-panel-bg:#12161f;
+}
+
+/* ===== ธีมแดงเกมมิ่งสำหรับการ์ดสินค้า ===== */
+
+.card{
+  border:1px solid rgba(255,77,77,.16) !important;
+  box-shadow:0 1px 3px rgba(0,0,0,.3);
+}
+
+.card-media{
+  position:relative;
+  height:150px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+.card-media::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:-1px; /* กันเส้นบางๆที่ subpixel rounding อาจทิ้งไว้ตรงขอบล่างสุด */
+  height:68%;
+  background:linear-gradient(to bottom,
+    rgba(10,10,14,0) 0%,
+    rgba(10,10,14,.38) 40%,
+    rgba(10,10,14,.75) 68%,
+    rgba(10,10,14,.94) 88%,
+    var(--card-panel-bg, #0d1119) 100%);
+  z-index:3;
+  pointer-events:none;
+}
+
+.card-art{
+  font-size:52px;
+  filter:drop-shadow(0 0 6px rgba(255,77,77,.25));
+  z-index:1;
+}
+
+.card-img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  z-index:2;
+}
+
+.price-pill{
+  position:absolute;
+  left:8px;
+  top:8px;
+  background:linear-gradient(180deg,#ff8080,#ff4d4d);
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+  padding:5px 10px;
+  border-radius:20px;
+  box-shadow:0 2px 6px rgba(0,0,0,.4);
+  z-index:4;
+}
+
+.stock-line{
+  font-size:11px;
+  color:#999;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin:2px 0 4px;
+}
+
+.card-meta-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin:2px 0 6px;
+}
+
+.price-pill-inline{
+  background:linear-gradient(180deg,#ff8080,#ff4d4d);
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+  padding:5px 10px;
+  border-radius:20px;
+  box-shadow:0 2px 6px rgba(0,0,0,.4);
+  white-space:nowrap;
+}
+
+.badge-inline{
+  background:#000c;
+  color:#ffd873;
+  font-size:11px;
+  font-weight:600;
+  padding:5px 10px;
+  border-radius:20px;
+  white-space:nowrap;
+}
+
+.agent-price-tag{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  background:linear-gradient(180deg,#2a1508,#1a0d05);
+  border:1px solid #ff9d4d;
+  color:#ffb873;
+  font-size:10.5px;
+  font-weight:700;
+  padding:4px 10px;
+  border-radius:20px;
+  margin:2px 0 6px;
+  width:fit-content;
+  box-shadow:0 0 8px rgba(255,157,77,.2);
+}
+
+.dot-green{
+  width:7px; height:7px; border-radius:50%;
+  background:#3ddc9a;
+  display:inline-block;
+}
+
+.dot-red{
+  width:7px; height:7px; border-radius:50%;
+  background:#ff7a86;
+  display:inline-block;
+}
+
+.buy-btn{
+  background:linear-gradient(180deg,#ff8080,#b3121f) !important;
+}
+.buy-btn:hover{
+  box-shadow:0 2px 8px rgba(255,77,77,.3) !important;
+}
+.buy-btn:disabled{
+  opacity:.4;
+  filter:grayscale(.4);
+}
+
+/* ===== สินค้าที่ถูกปิดขายชั่วคราว ===== */
+.card.card-closed{
+  border-color:rgba(255,43,69,.6) !important;
+  box-shadow:0 0 0 1px rgba(255,43,69,.25), 0 1px 3px rgba(0,0,0,.3);
+}
+.card.card-closed .card-media{
+  filter:grayscale(.5) brightness(.6);
+}
+.closed-ribbon{
+  position:absolute;
+  top:8px;
+  right:8px;
+  background:linear-gradient(180deg,#ff5a70,#c60f24);
+  color:#fff;
+  font-size:10.5px;
+  font-weight:700;
+  padding:5px 10px;
+  border-radius:20px;
+  z-index:3;
+  box-shadow:0 2px 6px rgba(0,0,0,.4);
+}
+.closed-note{
+  font-size:11px;
+  color:#ff9494;
+  background:rgba(255,43,69,.1);
+  border:1px solid rgba(255,43,69,.35);
+  border-radius:8px;
+  padding:7px 9px;
+  margin:2px 0 8px;
+  line-height:1.5;
+}
+
+.chip.active{
+  background:#ff4d4d !important;
+  border-color:#ff4d4d !important;
+}
+
+.view-btn{
+  border-color:#ff4d4d !important;
+  color:#ff4d4d !important;
+}
+
+/* ===== Sort dropdown ===== */
+select.sort-btn{
+  -webkit-appearance:none;
+  appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%23888'/></svg>");
+  background-repeat:no-repeat;
+  background-position:right 16px center;
+}
+
+/* ===== Reply time ===== */
+
+.reply-time{
+  font-size:11px;
+  color:#3ddc9a;
+  margin-top:4px;
+}
+
+/* ===== Wallet pill ===== */
+.wallet-btn{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  background:linear-gradient(180deg,#12161f,#0d1119);
+  border:1px solid #ffd873;
+  color:#ffd873;
+  font-size:12px;
+  font-weight:700;
+  padding:0 12px;
+  height:38px;
+  border-radius:20px;
+  cursor:pointer;
+  flex-shrink:0;
+  white-space:nowrap;
+}
+
+/* ===== Agent badge (ป้ายตัวแทน) ===== */
+.agent-badge{
+  display:none;
+  align-items:center;
+  gap:5px;
+  background:linear-gradient(180deg,#2a1508,#1a0d05);
+  border:1px solid #ff9d4d;
+  color:#ffb873;
+  font-size:11.5px;
+  font-weight:700;
+  padding:0 12px;
+  height:38px;
+  border-radius:20px;
+  flex-shrink:0;
+  white-space:nowrap;
+  box-shadow:0 0 10px rgba(255,157,77,.2);
+}
+
+/* ===== ชื่อร้าน — แสงแดงไล่วนขอบตัวอักษร (glow chase) ===== */
+.store-info h1{
+  position:relative;
+  display:inline-block;
+  background:linear-gradient(90deg,
+    #ff4d4d 0%, #ffb3b3 18%, #ff4d4d 36%, #b3121f 54%, #ff4d4d 72%, #ffb3b3 90%, #ff4d4d 100%);
+  background-size:250% auto;
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  color:transparent;
+  animation:shopNameShine 3.2s linear infinite, shopNameGlow 2.4s ease-in-out infinite;
+}
+@keyframes shopNameShine{
+  0%{ background-position:0% center; }
+  100%{ background-position:250% center; }
+}
+@keyframes shopNameGlow{
+  0%,100%{ filter:drop-shadow(0 0 3px rgba(255,77,77,.45)) drop-shadow(0 0 8px rgba(255,77,77,.2)); }
+  50%{ filter:drop-shadow(0 0 8px rgba(255,77,77,.85)) drop-shadow(0 0 18px rgba(255,77,77,.45)); }
+}
+
+/* ===== เอฟเฟกต์ค่อยๆปรากฏตอนเลื่อนดูสินค้า ===== */
+.card{
+  transition:opacity .6s cubic-bezier(.22,.61,.36,1), transform .6s cubic-bezier(.22,.61,.36,1);
+}
+.card.reveal-hidden{
+  opacity:0;
+  transform:translateY(28px);
+}
+.card.reveal-visible{
+  opacity:1;
+  transform:translateY(0);
+}
+@media (prefers-reduced-motion: reduce){
+  .card{ transition:none; }
+  .card.reveal-hidden{ opacity:1; transform:none; }
+}
+
+/* ===== แสงพื้นหลังไล่วนเบาๆ ===== */
+body{
+  background-image:
+    radial-gradient(circle at 18% 15%, rgba(255,77,77,.07), transparent 42%),
+    radial-gradient(circle at 82% 75%, rgba(255,77,77,.05), transparent 46%);
+  background-repeat:no-repeat;
+  background-size:220% 220%;
+  animation:bgGlowDrift 18s ease-in-out infinite;
+}
+@keyframes bgGlowDrift{
+  0%,100%{ background-position:0% 0%, 100% 100%; }
+  50%{ background-position:26% 30%, 74% 70%; }
+}
+
+/* ===== แถบ user ticker — อวตาร์ + ชื่อคนที่ใช้เว็บ เลื่อนวนอัตโนมัติ ===== */
+.user-ticker{
+  margin:0 16px 18px;
+  overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image:linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.user-ticker-track{
+  display:flex;
+  gap:10px;
+  width:max-content;
+  animation:userTickerScroll linear infinite;
+}
+@keyframes userTickerScroll{
+  0%{ transform:translateX(0); }
+  100%{ transform:translateX(-50%); }
+}
+.user-chip{
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:#12161f;
+  border:1px solid rgba(255,77,77,.18);
+  border-radius:20px;
+  padding:6px 14px 6px 6px;
+  white-space:nowrap;
+}
+.user-chip .u-avatar{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  background:linear-gradient(160deg,#1a0d05,#12161f);
+  border:1px solid #ff4d4d;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  flex-shrink:0;
+}
+.user-chip .u-name{
+  font-size:11.5px;
+  color:#c7d6e3;
+  font-weight:500;
+}
+
+/* กรอบอวตาร์ในแถบ ticker ตามยอดเติมสูงสุดของแต่ละคนเอง (ใช้ชุดสีเดียวกับหน้าโปรไฟล์) */
+.u-frame-wrap{
+  position:relative;
+  width:32px; height:32px;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.u-frame-wrap .u-avatar{ margin:0; position:relative; z-index:2; border-color:transparent; overflow:hidden; }
+/* ประกายเงาวิ่งผ่านอวตารเล็ก ให้ดูมันวาวเหมือนหน้าโปรไฟล์ */
+.u-frame-wrap .u-avatar::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(115deg, transparent 32%, rgba(255,255,255,.35) 48%, transparent 64%);
+  background-size:220% 220%;
+  animation:avatarShineSm 3.2s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes avatarShineSm{
+  0%{ background-position:130% 130%; }
+  50%{ background-position:10% 10%; }
+  100%{ background-position:130% 130%; }
+}
+.u-frame-wrap::before{
+  content:"";
+  position:absolute;
+  inset:-3px;
+  border-radius:50%;
+  z-index:1;
+  animation:frameSpin 4s linear infinite;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.15);
+}
+/* แสงเรืองฟุ้งด้านหลังกรอบ ให้เอฟเฟกต์ขึ้นเหมือนหน้าโปรไฟล์ */
+.u-frame-wrap::after{
+  content:"";
+  position:absolute;
+  inset:-7px;
+  border-radius:50%;
+  z-index:0;
+  filter:blur(6px);
+  animation:frameGlowPulseSm 2.4s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes frameGlowPulseSm{
+  0%,100%{ opacity:.45; transform:scale(.92); }
+  50%{ opacity:.9; transform:scale(1.12); }
+}
+@keyframes frameSpin{ from{ transform:rotate(0deg); } to{ transform:rotate(360deg); } }
+.frame-white::before{ background:conic-gradient(from 0deg, #8b95a1 0%, #ffffff 12%, #ffffff 20%, #8b95a1 35%, #565e68 50%, #ffffff 65%, #ffffff 73%, #8b95a1 88%, #8b95a1 100%); }
+.frame-white::after{ background:radial-gradient(circle, rgba(255,255,255,.55), transparent 70%); }
+.frame-blue::before{ background:conic-gradient(from 0deg, #0d5a8c 0%, #7fe0ff 12%, #eaffff 20%, #4dc3ff 35%, #0d5a8c 50%, #7fe0ff 65%, #eaffff 73%, #1a7fc4 88%, #0d5a8c 100%); animation-duration:5.5s; }
+.frame-blue::after{ background:radial-gradient(circle, rgba(77,195,255,.55), transparent 70%); }
+.frame-red::before{ background:conic-gradient(from 0deg, #6b0d14 0%, #ff8080 12%, #fff0f0 20%, #ff4d4d 35%, #6b0d14 50%, #ff8080 65%, #fff0f0 73%, #b3121f 88%, #6b0d14 100%); animation-duration:4.2s; }
+.frame-red::after{ background:radial-gradient(circle, rgba(255,77,77,.6), transparent 70%); }
+/* 600.000 กีบ — เพชรฟ้าอมเขียว (แยกจากสีขาว 20.000 อย่างชัดเจน) */
+.frame-gray::before{ background:conic-gradient(from 0deg, #0a3d40 0%, #7ffff5 12%, #eafffc 20%, #2dd4c8 35%, #0a3d40 50%, #7ffff5 65%, #eafffc 73%, #145e59 88%, #0a3d40 100%); animation-duration:6s; }
+.frame-gray::after{ background:radial-gradient(circle, rgba(45,212,200,.6), transparent 70%); }
+.frame-royal::before{ background:conic-gradient(from 0deg, #4a1a80 0%, #ffd873 10%, #fff3d0 16%, #b366ff 30%, #4a1a80 45%, #ffd873 60%, #fff3d0 66%, #6a1fd0 80%, #4a1a80 100%); animation:frameSpin 3.8s linear infinite, royalHueShiftSm 6s linear infinite; }
+.frame-royal::after{ background:radial-gradient(circle, rgba(179,102,255,.6) 0%, rgba(255,215,115,.45) 55%, transparent 78%); animation:frameGlowPulseSm 1.8s ease-in-out infinite; }
+@keyframes royalHueShiftSm{ 0%{ filter:hue-rotate(0deg) saturate(1); } 50%{ filter:hue-rotate(35deg) saturate(1.3); } 100%{ filter:hue-rotate(0deg) saturate(1); } }
+
+/* 3.000.000 กีบ — LEGENDARY (เหนือ VIP) ดำ-ทอง + มังกรไฟ + นีออน — เวอร์ชันย่อของหน้าโปรไฟล์ */
+.frame-legend::before{
+  background:conic-gradient(from 0deg,
+    #050505 0%, #ffd873 8%, #050505 16%, #ff2e6d 24%,
+    #050505 32%, #ffd873 40%, #050505 48%, #4dd8ff 56%,
+    #050505 64%, #ffd873 72%, #050505 80%, #b366ff 88%, #050505 100%);
+  animation:frameSpin 4.5s linear infinite, legendHueShiftSm 8s ease-in-out infinite;
+}
+.frame-legend::after{ background:radial-gradient(circle, rgba(255,46,109,.5) 0%, rgba(77,216,255,.4) 45%, rgba(179,102,255,.35) 70%, transparent 85%); animation:frameGlowPulseSm 2.2s ease-in-out infinite; }
+@keyframes legendHueShiftSm{
+  0%{ filter:hue-rotate(0deg) saturate(1.1); }
+  33%{ filter:hue-rotate(35deg) saturate(1.4); }
+  66%{ filter:hue-rotate(-30deg) saturate(1.3); }
+  100%{ filter:hue-rotate(0deg) saturate(1.1); }
+}
+
+/* มินิเอฟเฟกต์เพิ่มเติมรอบอวตารเล็ก (ปุ่มบัญชี/ทิกเกอร์) ให้ตรงกับกรอบใหญ่ในหน้าโปรไฟล์ — ใช้รูปทรง CSS ล้วน ไม่ใช้อิโมจิ */
+.u-fx{ position:absolute; z-index:4; pointer-events:none; opacity:0; }
+.u-fx-bolt{
+  width:7px; height:11px;
+  background:linear-gradient(180deg,#fff3d0,#ff8080 45%,#ff4d4d);
+  clip-path:polygon(58% 0%, 0% 58%, 42% 58%, 34% 100%, 100% 40%, 52% 40%);
+  filter:drop-shadow(0 0 3px #ff4d4d);
+  animation:uBoltFlicker 1.8s ease-in-out infinite;
+}
+@keyframes uBoltFlicker{
+  0%,100%{ opacity:0; } 8%,18%{ opacity:1; } 26%{ opacity:0; } 55%,68%{ opacity:1; } 78%{ opacity:0; }
+}
+.u-fx-star{
+  width:9px; height:9px;
+  background:linear-gradient(180deg,#ffffff,#7fe0ff);
+  clip-path:polygon(50% 0%, 61% 38%, 98% 38%, 68% 60%, 79% 95%, 50% 74%, 21% 95%, 32% 60%, 2% 38%, 39% 38%);
+  filter:drop-shadow(0 0 3px #7fe0ff) drop-shadow(0 0 2px #000);
+  animation:uSparkleTwinkle 2.2s ease-in-out infinite;
+}
+.u-fx-gem{
+  width:7px; height:9px;
+  background:linear-gradient(180deg,#eafffc,#2dd4c8);
+  clip-path:polygon(50% 0%, 100% 38%, 80% 100%, 20% 100%, 0% 38%);
+  filter:drop-shadow(0 0 3px #2dd4c8) drop-shadow(0 0 2px #000);
+  animation:uSparkleTwinkle 2.2s ease-in-out infinite;
+}
+@keyframes uSparkleTwinkle{
+  0%,100%{ opacity:0; transform:scale(.3) rotate(0deg); }
+  45%{ opacity:1; transform:scale(1.1) rotate(160deg); }
+  60%{ opacity:.6; transform:scale(.85) rotate(200deg); }
+}
+.frame-gray .u-fx-star{ background:linear-gradient(180deg,#eafffc,#2dd4c8); filter:drop-shadow(0 0 3px #2dd4c8) drop-shadow(0 0 2px #000); }
+.frame-royal .u-fx-star, .frame-royal .u-fx-gem{ background:linear-gradient(180deg,#ffe9a8,#b366ff); filter:drop-shadow(0 0 3px #ffd873) drop-shadow(0 0 2px #000); }
+/* มินิเอฟเฟกต์ของ LEGENDARY — เปลวไฟทอง-แดง + ประกายฟ้า-ม่วง (ยืม u-fx-bolt/star/gem เดิม แต่ทับสีใหม่ให้เข้าธีม) */
+.frame-legend .u-fx-bolt{ background:linear-gradient(180deg,#ffd873,#ff8080 45%,#ff2e6d); filter:drop-shadow(0 0 3px #ff2e6d) drop-shadow(0 0 2px #ffd873); }
+.frame-legend .u-fx-star{ background:linear-gradient(180deg,#b366ff,#4dd8ff); filter:drop-shadow(0 0 3px #4dd8ff) drop-shadow(0 0 2px #000); }
+.frame-legend .u-fx-gem{ background:linear-gradient(180deg,#4dd8ff,#ff2e6d); filter:drop-shadow(0 0 3px #ff2e6d) drop-shadow(0 0 2px #000); }
+.frame-legend .u-fx-rays{
+  background:conic-gradient(from 0deg,
+    transparent 0deg, rgba(255,46,109,.4) 4deg, transparent 10deg,
+    transparent 34deg, rgba(77,216,255,.35) 38deg, transparent 44deg,
+    transparent 68deg, rgba(255,215,115,.4) 72deg, transparent 78deg,
+    transparent 102deg, rgba(179,102,255,.35) 106deg, transparent 112deg,
+    transparent 136deg, rgba(255,46,109,.4) 140deg, transparent 146deg,
+    transparent 170deg, rgba(77,216,255,.35) 174deg, transparent 180deg,
+    transparent 204deg, rgba(255,215,115,.4) 208deg, transparent 214deg,
+    transparent 238deg, rgba(179,102,255,.35) 242deg, transparent 248deg,
+    transparent 272deg, rgba(255,46,109,.4) 276deg, transparent 282deg,
+    transparent 306deg, rgba(77,216,255,.35) 310deg, transparent 316deg,
+    transparent 340deg, rgba(255,215,115,.4) 344deg, transparent 350deg);
+}
+.u-fx-crown{
+  width:22px; height:15px;
+  transform:translateX(-50%);
+  background:linear-gradient(180deg,#ffe9a8 0%,#ffd873 45%,#e0a020 100%);
+  clip-path:polygon(0% 100%, 0% 45%, 22% 65%, 36% 15%, 50% 55%, 64% 15%, 78% 65%, 100% 45%, 100% 100%);
+  filter:drop-shadow(0 0 4px rgba(255,215,115,.9)) drop-shadow(0 1px 1px rgba(0,0,0,.8));
+  opacity:1;
+  animation:uCrownBob 2s ease-in-out infinite;
+}
+@keyframes uCrownBob{
+  0%,100%{ transform:translateX(-50%) translateY(0) rotate(-6deg); }
+  50%{ transform:translateX(-50%) translateY(-3px) rotate(6deg); }
+}
+@media (prefers-reduced-motion: reduce){
+  .u-fx-bolt, .u-fx-star, .u-fx-gem, .u-fx-crown, .u-fx-dot, .u-fx-rays{ animation:none; opacity:1; }
+}
+.u-fx-dot{
+  position:absolute;
+  width:3px; height:3px;
+  border-radius:50%;
+  z-index:4;
+  background:#eafffc;
+  box-shadow:0 0 4px #7ffff5, 0 0 2px #fff;
+  opacity:0;
+  animation:uDotFloat 2.6s ease-in infinite;
+  pointer-events:none;
+}
+@keyframes uDotFloat{
+  0%{ transform:translateY(0) scale(1); opacity:0; }
+  15%{ opacity:1; }
+  100%{ transform:translateY(-12px) scale(.3); opacity:0; }
+}
+.u-fx-rays{
+  position:absolute;
+  inset:-9px;
+  z-index:0;
+  border-radius:50%;
+  pointer-events:none;
+  background:conic-gradient(from 0deg,
+    transparent 0deg, rgba(255,215,115,.4) 4deg, transparent 10deg,
+    transparent 34deg, rgba(179,102,255,.35) 38deg, transparent 44deg,
+    transparent 68deg, rgba(255,215,115,.4) 72deg, transparent 78deg,
+    transparent 102deg, rgba(179,102,255,.35) 106deg, transparent 112deg,
+    transparent 136deg, rgba(255,215,115,.4) 140deg, transparent 146deg,
+    transparent 170deg, rgba(179,102,255,.35) 174deg, transparent 180deg,
+    transparent 204deg, rgba(255,215,115,.4) 208deg, transparent 214deg,
+    transparent 238deg, rgba(179,102,255,.35) 242deg, transparent 248deg,
+    transparent 272deg, rgba(255,215,115,.4) 276deg, transparent 282deg,
+    transparent 306deg, rgba(179,102,255,.35) 310deg, transparent 316deg,
+    transparent 340deg, rgba(255,215,115,.4) 344deg, transparent 350deg);
+  animation:uRaysSpin 9s linear infinite;
+  mix-blend-mode:screen;
+}
+@keyframes uRaysSpin{ from{ transform:rotate(0deg); } to{ transform:rotate(360deg); } }
+@media (prefers-reduced-motion: reduce){
+  .u-frame-wrap::before, .u-frame-wrap::after, .u-frame-wrap .u-avatar::after{ animation:none; }
+}
+@media (prefers-reduced-motion: reduce){
+  .user-ticker-track{ animation:none; }
+}
+
+/* ===== Leaderboard carousel — อันดับคนเติมเงินสูงสุด 7 วันล่าสุด (compact) ===== */
+.lb-section{ margin:10px 16px 18px; }
+.lb-heading{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:15px;
+  font-weight:700;
+  margin-bottom:10px;
+  color:#ffd873;
+}
+.lb-heading .lb-sub{
+  font-size:11px;
+  font-weight:400;
+  color:#9db4c7;
+  margin-left:auto;
+}
+
+.lb-carousel{
+  position:relative;
+  border-radius:16px;
+  overflow:hidden;
+  border:1px solid rgba(255,215,115,.2);
+  background:#0d1119;
+}
+.lb-track{
+  display:flex;
+  transition:transform .5s cubic-bezier(.65,0,.35,1);
+}
+.lb-slide{
+  flex-shrink:0;
+  position:relative;
+  padding:16px 14px 14px;
+}
+/* .lb-slide ตัด overflow ไว้เพื่อกักแสง shine ให้อยู่ในการ์ด แต่ก็ดันไปตัดแสงเรืองฟุ้งรอบอวตาร (::after
+   ของ .lb-avatar-wrap) ทิ้งไปด้วยโดยไม่ตั้งใจ เพราะมันโป่งออกนอกกรอบอวตาร — บังคับเปิด overflow เฉพาะ
+   จุดนี้กลับมา โดย .lb-carousel (พ่อของ .lb-slide) ยังคุม overflow:hidden รอบนอกอยู่เหมือนเดิม
+   ดังนั้นแสง shine จะยังไม่หลุดออกไปไหน แค่แสงเรืองรอบอวตารจะไม่โดนตัดแล้ว */
+.lb-slide{ overflow:visible !important; }
+.lb-slide-shine{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background-size:250% 100%;
+  mix-blend-mode:screen;
+  opacity:.35;
+  animation:lbShineFlow linear infinite;
+}
+.lb-slide-inner{
+  position:relative;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  gap:5px;
+}
+@keyframes lbShineFlow{
+  0%{ background-position:0% center; }
+  100%{ background-position:250% center; }
+}
+
+.lb-tier-1 .lb-slide-shine{
+  background-image:linear-gradient(100deg,#ffb340 0%,#fff3d0 18%,#ffb340 36%,#7a5013 54%,#ffb340 72%,#fff3d0 90%,#ffb340 100%);
+  animation-duration:3.5s;
+}
+.lb-tier-2 .lb-slide-shine{
+  background-image:linear-gradient(100deg,#c8d2e0 0%,#f2f6fa 18%,#c8d2e0 36%,#5c6b78 54%,#c8d2e0 72%,#f2f6fa 90%,#c8d2e0 100%);
+  animation-duration:4.5s;
+}
+.lb-tier-3 .lb-slide-shine{
+  background-image:linear-gradient(100deg,#cd7f32 0%,#f0c090 18%,#cd7f32 36%,#6b3e14 54%,#cd7f32 72%,#f0c090 90%,#cd7f32 100%);
+  animation-duration:5.5s;
+}
+.lb-tier-4 .lb-slide-shine{ display:none; }
+
+/* ป้ายอันดับ — ชิปเล็กด้านบนสุดของการ์ด */
+.lb-rank-badge{
+  font-size:10.5px;
+  font-weight:700;
+  padding:3px 11px;
+  border-radius:999px;
+  letter-spacing:.2px;
+  background:rgba(255,215,115,.12);
+  border:1px solid rgba(255,215,115,.35);
+  color:#ffd873;
+  white-space:nowrap;
+}
+.lb-tier-1 .lb-rank-badge{ background:linear-gradient(180deg,#ffe9b0,#ffb340); border-color:#ffb340; color:#3a2400; box-shadow:0 0 8px rgba(255,193,64,.5); }
+.lb-tier-2 .lb-rank-badge{ background:linear-gradient(180deg,#eef2f6,#b9c4cf); border-color:#b9c4cf; color:#1a232c; box-shadow:0 0 6px rgba(200,210,225,.4); }
+.lb-tier-3 .lb-rank-badge{ background:linear-gradient(180deg,#e3a466,#a9662c); border-color:#a9662c; color:#2a1503; }
+.lb-tier-4 .lb-rank-badge{ background:linear-gradient(180deg,#ff8080,#b3121f); border-color:#ff4d4d; color:#fff; }
+
+.lb-avatar-wrap{
+  position:relative;
+  width:52px; height:52px;
+  flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  margin-top:2px;
+}
+.lb-avatar{
+  width:46px; height:46px;
+  border-radius:50%;
+  background:linear-gradient(160deg,#1a0d05,#0d1119);
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px;
+  position:relative;
+  z-index:2;
+  overflow:hidden;
+}
+.lb-crown{
+  position:absolute;
+  top:-9px;
+  left:50%;
+  width:16px; height:10px;
+  transform:translateX(-50%);
+  z-index:3;
+  background:linear-gradient(180deg,#ffd873,#fff3d0 45%,#ffb340);
+  clip-path:polygon(0% 100%, 0% 40%, 20% 60%, 35% 15%, 50% 52%, 65% 15%, 80% 60%, 100% 40%, 100% 100%);
+  animation:lbCrownFloat 2.2s ease-in-out infinite;
+  filter:drop-shadow(0 0 5px rgba(255,215,115,.7));
+}
+@keyframes lbCrownFloat{
+  0%,100%{ transform:translateX(-50%) translateY(0) rotate(-6deg); }
+  50%{ transform:translateX(-50%) translateY(-4px) rotate(6deg); }
+}
+
+.lb-name{
+  font-size:12.5px;
+  font-weight:700;
+  max-width:220px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* สองชิปสถิติ เรียงแนวนอน กึ่งกลาง */
+.lb-stats{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.lb-stat-pill{
+  font-size:10px;
+  padding:4px 9px;
+  border-radius:999px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  color:#c7d6e3;
+  white-space:nowrap;
+}
+.lb-stat-pill b{ color:#ffd873; font-family:'Orbitron',sans-serif; }
+
+.lb-week-note{
+  font-size:10px;
+  color:#ff9f6b;
+  opacity:.9;
+}
+
+/* แสงเรืองฟุ้งด้านหลังอวตารในการ์ดอันดับ ให้ทุกอันดับดูมีชีวิตชีวาเหมือนกันหมด ไม่ใช่แค่อันดับ 1 */
+.lb-avatar-wrap::after{
+  content:"";
+  position:absolute;
+  inset:-12px;
+  border-radius:50%;
+  z-index:0;
+  filter:blur(10px);
+  animation:lbGlowPulse 2.4s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes lbGlowPulse{
+  0%,100%{ opacity:.55; transform:scale(.92); }
+  50%{ opacity:1; transform:scale(1.15); }
+}
+/* ประกายกระพริบรอบวงอวตารในการ์ดอันดับ ให้เห็นชัดแน่นอนแม้แสง glow จะจางไปกับพื้นหลัง */
+.lb-sparkle{
+  position:absolute;
+  width:10px; height:10px;
+  z-index:5;
+  opacity:0;
+  animation:lbSparkleTwinkle 2.2s ease-in-out infinite;
+  pointer-events:none;
+  background:linear-gradient(180deg,#ffd873,#ffb340);
+  filter:drop-shadow(0 0 4px rgba(255,215,115,.7));
+}
+.lb-sparkle.shape-star{ clip-path:polygon(50% 0%, 61% 38%, 98% 38%, 68% 60%, 79% 95%, 50% 74%, 21% 95%, 32% 60%, 2% 38%, 39% 38%); }
+.lb-sparkle.shape-gem{ clip-path:polygon(50% 0%, 100% 38%, 80% 100%, 20% 100%, 0% 38%); }
+.lb-tier-2 .lb-sparkle{ background:linear-gradient(180deg,#eef2f6,#b9c4cf); filter:drop-shadow(0 0 4px rgba(200,210,225,.6)); }
+.lb-tier-3 .lb-sparkle{ background:linear-gradient(180deg,#e3a466,#a9662c); filter:drop-shadow(0 0 4px rgba(205,127,50,.5)); }
+.lb-tier-4 .lb-sparkle{ background:linear-gradient(180deg,#ff8080,#ff4d4d); filter:drop-shadow(0 0 4px rgba(255,77,77,.6)); }
+@keyframes lbSparkleTwinkle{
+  0%,100%{ opacity:0; transform:scale(.3) rotate(0deg); }
+  45%{ opacity:1; transform:scale(1.2) rotate(180deg); }
+  60%{ opacity:.7; transform:scale(.9) rotate(220deg); }
+}
+
+/* โทนอันดับ 1 — ทอง เรืองแสง */
+.lb-tier-1{ background:radial-gradient(circle at 50% 0%, rgba(255,215,115,.14), transparent 60%); }
+.lb-tier-1 .lb-avatar{ border:2px solid #ffd873; box-shadow:0 0 16px rgba(255,215,115,.5); }
+.lb-tier-1 .lb-avatar-wrap::before{
+  content:"";
+  position:absolute; inset:-3px;
+  border-radius:50%;
+  background:conic-gradient(from 0deg, #ffd873, #ff8080, #ffd873, #ff8080, #ffd873);
+  animation:lbRingSpin 3.5s linear infinite;
+  z-index:1;
+}
+.lb-tier-1 .lb-avatar-wrap::after{ background:radial-gradient(circle, rgba(255,225,140,.9), transparent 70%); }
+.lb-tier-1 .lb-name{
+  background:linear-gradient(90deg,#ffd873,#fff3d0,#ffd873,#ffb340,#ffd873);
+  background-size:250% auto;
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent;
+  animation:shopNameShine 3s linear infinite;
+}
+
+/* โทนอันดับ 2 — เงิน */
+.lb-tier-2{ background:radial-gradient(circle at 50% 0%, rgba(200,210,225,.10), transparent 60%); }
+.lb-tier-2 .lb-avatar{ border:2px solid #c8d2e0; box-shadow:0 0 12px rgba(200,210,225,.35); }
+.lb-tier-2 .lb-avatar-wrap::before{
+  content:"";
+  position:absolute; inset:-3px;
+  border-radius:50%;
+  background:conic-gradient(from 0deg, #c8d2e0, #7d8b99, #c8d2e0);
+  animation:lbRingSpin 4.5s linear infinite;
+  z-index:1;
+  opacity:.85;
+}
+.lb-tier-2 .lb-avatar-wrap::after{ background:radial-gradient(circle, rgba(180,225,255,.85), transparent 70%); }
+
+/* โทนอันดับ 3 — บรอนซ์ */
+.lb-tier-3 .lb-avatar{ border:2px solid #cd7f32; box-shadow:0 0 8px rgba(205,127,50,.3); }
+.lb-tier-3 .lb-avatar-wrap::before{
+  content:"";
+  position:absolute; inset:-3px;
+  border-radius:50%;
+  background:conic-gradient(from 0deg, #cd7f32, #ffcf94, #cd7f32, #8a5423, #cd7f32);
+  animation:lbRingSpin 5.2s linear infinite;
+  z-index:1;
+  opacity:.8;
+}
+.lb-tier-3 .lb-avatar-wrap::after{ background:radial-gradient(circle, rgba(255,170,90,.85), transparent 70%); }
+
+/* โทนอันดับ 4 — แดงร้าน (ปกติ) */
+.lb-tier-4 .lb-avatar{ border:2px solid #ff4d4d; box-shadow:0 0 8px rgba(255,77,77,.3); }
+.lb-tier-4 .lb-avatar-wrap::before{
+  content:"";
+  position:absolute; inset:-3px;
+  border-radius:50%;
+  background:conic-gradient(from 0deg, #ff4d4d, #ffb3b3, #ff4d4d, #b3121f, #ff4d4d);
+  animation:lbRingSpin 4.8s linear infinite;
+  z-index:1;
+  opacity:.8;
+}
+.lb-tier-4 .lb-avatar-wrap::after{ background:radial-gradient(circle, rgba(255,90,90,.85), transparent 70%); }
+
+@keyframes lbRingSpin{ 0%{ transform:rotate(0deg); } 100%{ transform:rotate(360deg); } }
+
+.lb-dots{
+  display:flex;
+  justify-content:center;
+  gap:6px;
+  padding:0 0 12px;
+}
+.lb-dot{
+  width:6px; height:6px; border-radius:50%;
+  background:#333;
+  transition:.2s;
+}
+.lb-dot.active{
+  background:#ffd873;
+  width:16px;
+  border-radius:4px;
+}
+@media (prefers-reduced-motion: reduce){
+  .lb-crown, .lb-avatar-wrap::before, .lb-avatar-wrap::after, .lb-sparkle, .lb-name, .lb-slide-shine{ animation:none; }
+}
+/* ===== แสงเรืองรอบปุ่มบัญชี (บนสุด) ตามระดับกรอบ =====
+   ใช้ box-shadow บนตัวปุ่ม #accountBtn เอง (ไม่ใช่ลูกข้างใน) เพราะถ้า .account-btn
+   ใน style.css มี overflow:hidden ไว้บังคับให้เป็นวงกลม เอฟเฟกต์ที่เป็นลูกข้างในจะโดนตัดออก
+   แต่ box-shadow ของปุ่มเอง จะไม่โดนตัดโดย overflow ของตัวมันเอง ทำให้เอฟเฟกต์ขึ้นแน่นอน */
+#accountBtn.acct-glow{ animation:acctGlowPulse 2.2s ease-in-out infinite; }
+@keyframes acctGlowPulse{
+  0%,100%{ box-shadow:0 0 8px var(--acct-a,transparent), 0 0 3px var(--acct-b,transparent); }
+  50%{ box-shadow:0 0 20px var(--acct-a,transparent), 0 0 8px var(--acct-b,transparent); }
+}
+#accountBtn.acct-glow-white{ --acct-a:rgba(255,255,255,.7); --acct-b:rgba(255,255,255,.4); }
+#accountBtn.acct-glow-blue{ --acct-a:rgba(77,195,255,.7); --acct-b:rgba(127,224,255,.4); }
+#accountBtn.acct-glow-red{ --acct-a:rgba(255,77,77,.7); --acct-b:rgba(255,128,128,.4); }
+#accountBtn.acct-glow-gray{ --acct-a:rgba(45,212,200,.75); --acct-b:rgba(127,255,245,.4); }
+#accountBtn.acct-glow-royal{ --acct-a:rgba(179,102,255,.75); --acct-b:rgba(255,215,115,.55); }
+#accountBtn.acct-glow-legend{ --acct-a:rgba(255,46,109,.75); --acct-b:rgba(77,216,255,.55); }
+@media (prefers-reduced-motion: reduce){
+  #accountBtn.acct-glow{ animation:none; box-shadow:0 0 12px var(--acct-a,transparent), 0 0 4px var(--acct-b,transparent); }
+}
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="loader">
+<span class="loader-ember" style="left:10%;animation-delay:0s;"></span>
+<span class="loader-ember" style="left:24%;animation-delay:.35s;"></span>
+<span class="loader-ember" style="left:40%;animation-delay:.15s;"></span>
+<span class="loader-ember" style="left:58%;animation-delay:.5s;"></span>
+<span class="loader-ember" style="left:74%;animation-delay:.25s;"></span>
+<span class="loader-ember" style="left:88%;animation-delay:.45s;"></span>
+<span class="loader-bolt" style="top:12%;left:8%;transform:rotate(-15deg);animation-delay:.1s;"></span>
+<span class="loader-bolt" style="top:18%;right:10%;transform:rotate(20deg);animation-delay:.4s;"></span>
+<span class="loader-bolt" style="bottom:16%;left:14%;transform:rotate(160deg);animation-delay:.22s;"></span>
+<span class="loader-bolt" style="bottom:20%;right:16%;transform:rotate(-160deg);animation-delay:.55s;"></span>
+<div class="loader-content">
+<div class="loader-logo-wrap">
+<div class="loader-shockwave"></div>
+<img class="loader-logo" src="logo.png">
+<div class="loader-sheen"></div>
+</div>
+<div class="loader-name">
+<span style="animation-delay:1.10s">𝐃</span><span style="animation-delay:1.18s">𝐄</span><span style="animation-delay:1.26s">𝐊</span><span class="loader-sp"></span><span style="animation-delay:1.42s">𝐌</span><span style="animation-delay:1.50s">𝐀</span><span style="animation-delay:1.58s">𝐒</span><span style="animation-delay:1.66s">𝐇</span><span class="loader-sp"></span><span style="animation-delay:1.82s">𝐒</span><span style="animation-delay:1.90s">𝐇</span><span style="animation-delay:1.98s">𝐎</span><span style="animation-delay:2.06s">𝐏</span>
+</div>
+</div>
+</div>
+
+
+<div class="announce">
+<div class="announce-track">
+<span>📢 ຕິດຕໍ່ໄດ້ຜ່ານ Discord ເທ່ານັ້ນ!!</span>
+<span class="announce-sep">⚡ ມີປັນຫາຕິດຕໍ່ແອດທິນດ່ວນ! !</span>
+<span>📢 ຕິດຕໍ່ແອດມິນຜ່ານ Discord ເທ່ານັ້ນ!!</span>
+<span class="announce-sep">⚡ ໂປແກມມີປັນຫາຕິດຕໍ່ແອດມິນ</span>
+</div>
+</div>
+
+
+<header class="topbar">
+
+<div class="menu" onclick="openMenu()">
+<span></span>
+<span></span>
+<span></span>
+</div>
+
+<div class="search-box">
+<input type="text" id="searchInput" placeholder="🔍 ກວດເບິ່ງສິນຄ້າ...">
+</div>
+
+<div class="agent-badge" id="agentBadge">🏷️ ຕົວແທນ</div>
+
+<div class="wallet-btn" id="walletBtn" onclick="handleWalletClick()" style="display:none;">💰 <span id="walletBalanceTxt">0</span></div>
+
+<div class="account-btn" id="accountBtn" onclick="handleAccountClick()">👤</div>
+
+</header>
+
+
+<div class="store-banner">
+
+<img src="logo.png" class="store-logo" alt="logo">
+
+<div class="store-info">
+<h1>𝐃𝐄𝐊 𝐌𝐀𝐒𝐇 𝐒𝐇𝐎𝐏</h1>
+<p>ເວັບຂາຍໂປຮຄົບວົງຈອນ</p>
+<p class="reply-time">⏱ ແອດມິນຕອບໄວພາຍໃນ 5-10 ນາທີ · ເວລາ 08:00-24:00</p>
+</div>
+
+</div>
+
+
+<div class="page-title">
+<h2>ສິນຄ້າທັງຫມົດ</h2>
+<p id="itemCount">ເລືອກເບິ່ງສິນຄ້າ</p>
+</div>
+
+
+<div class="filter-row">
+
+<select class="sort-btn" id="sortSelect">
+<option value="default">ຄ່າເລິ່ມຕົ້ນ</option>
+<option value="price-asc">ລາຄາ: ຕ່ຳ → ສູງ</option>
+<option value="price-desc">ລາຄາ: ສູງ → ຕ່ຳ</option>
+<option value="name-asc">ຊື່: ກ → ຮ</option>
+<option value="stock-desc">ສະຕ໋ອກ: ຫຼາຍ → ນ້ອຍ</option>
+</select>
+
+<button class="view-btn">☰</button>
+
+</div>
+
+
+
+<!-- อันดับคนเติมเงินสูงสุด 7 วันล่าสุด -->
+<div class="lb-section" id="lbSection" style="display:none;">
+<div class="lb-heading">🏆 ສຸດຍອດນັກເຕີມ <span class="lb-sub">ອັບເດດທຸກ 7 ວັນ</span></div>
+<div class="lb-carousel">
+<div class="lb-track" id="lbTrack"></div>
+<div class="lb-dots" id="lbDots"></div>
+</div>
+</div>
+
+
+<!-- แถบอวตาร์ + ชื่อคนที่ใช้เว็บ เลื่อนวนอัตโนมัติ -->
+<div class="user-ticker" id="userTicker" style="display:none;">
+<div class="user-ticker-track" id="userTickerTrack"></div>
+</div>
+
+
+
+<!-- สินค้าจะถูกสร้างโดย script.js อัตโนมัติ -->
+<section class="products" id="productGrid"></section>
+
+
+<button class="chat-fab" onclick="window.location.href='https://discord.gg/umsDBJhCc'">💬</button>
+
+
+
+<div class="sidebar" id="sidebar">
+
+<div class="close" onclick="closeMenu()">✕</div>
+
+<a href="index.html">🏠 ຫນ້າລ໋ອກອີນ</a>
+<a href="product.html">🛒 ສິນຄ້າ</a>
+<a href="topup.html">💰 ເຕີມເງິນ</a>
+<a href="history.html">📋 ປະຫວັດການສັ່ງຊື້</a>
+<a href="policy.html">📄 ນະໂຍບາຍຮ້ານ</a>
+<a onclick="handleAccountClick()">👤 ລ໋ອກອິນ</a>
+<a href="https://discord.gg/umsDBJhCc">📞 ຕິດຕໍ່</a>
+
+</div>
+
+
+<div class="login-box" id="loginBox">
+
+<div class="login">
+
+<div onclick="closeLogin()" class="x">✕</div>
+
+<h2 id="authTitle">ສະຫມັກສະມາຊິກ</h2>
+<p class="auth-sub">ມີບັນຊີຢູ່ແລ້ວ? <span onclick="toggleAuthMode()" id="authSubLink">ເຂົ້າສູ່ລະບົບທີ່ນີ້</span></p>
+
+<div class="auth-msg" id="authMsg"></div>
+
+<div class="field-group" id="nameGroup">
+<label class="field-label">ຊື່</label>
+<input id="fullName" type="text" placeholder="ຊື່ຂອງທ່ານ">
+</div>
+
+<div class="field-group">
+<label class="field-label">ອີເມວ</label>
+<input id="user" type="email" placeholder="you@example.com">
+</div>
+
+<div class="field-group">
+<label class="field-label">ລະຫັດຜ່ານ</label>
+<div class="pw-wrap">
+<input id="pass" type="password" placeholder="••••••••">
+<span class="pw-eye" onclick="togglePw('pass', this)">👁</span>
+</div>
+</div>
+
+<div class="field-group" id="confirmGroup">
+<label class="field-label">ຢືນຢັນລະຫັດຜ່ານ</label>
+<div class="pw-wrap">
+<input id="passConfirm" type="password" placeholder="••••••••">
+<span class="pw-eye" onclick="togglePw('passConfirm', this)">👁</span>
+</div>
+</div>
+
+<label class="terms-row" id="termsGroup">
+<input type="checkbox" id="agreeTerms">
+<span>ຂ້ອຍໄດ້ອ່ານແລະຍອມຮັບ <a href="policy.html" onclick="event.stopPropagation()">ເງື່ອນໄຂການໃຊ້ງານ</a> ແລະ <a href="policy.html" onclick="event.stopPropagation()">ນະໂຍບາຍຄວາມເປັນສ່ວນຕົວ</a></span>
+</label>
+
+<button onclick="handleAuth()" id="authButton">
+ສະຫມັກສະມາຊິກ
+</button>
+
+<div id="googleWrap" style="display:block;">
+<div style="display:flex;align-items:center;gap:10px;margin:16px 0;color:#666;font-size:12px;">
+<div style="flex:1;height:1px;background:#333;"></div>
+ຫຼື
+<div style="flex:1;height:1px;background:#333;"></div>
+</div>
+
+<button onclick="signInWithGoogle()" style="width:100%;padding:12px;background:#fff;border:none;border-radius:10px;color:#0d1119;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;">
+<img src="https://www.svgrepo.com/show/475656/google-color.svg" style="width:18px;height:18px;">
+ເຂົ້າສູ່ລະບົບດ້ວຍ Google
+</button>
+</div>
+
+<p onclick="toggleAuthMode()" id="authToggle" style="margin-top:15px;">ມີບັນຊີຢູ່ແລ້ວ? ເຂົ້າສູ່ລະບົບ</p>
+
+</div>
+
+</div>
+
+<script src="supabase.js"></script>
+
+<script src="script.js?v=4"></script>
+
+
+</body>
+
+</html>
